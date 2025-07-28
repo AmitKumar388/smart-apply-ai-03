@@ -1,6 +1,7 @@
 import React from 'react';
-import { Bell, Settings, User } from 'lucide-react';
+import { Bell, Settings, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardHeaderProps {
   title: string;
@@ -8,6 +9,8 @@ interface DashboardHeaderProps {
 }
 
 export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
+  const { user, signOut } = useAuth();
+
   return (
     <header className="bg-background border-b border-border/50 px-8 py-4">
       <div className="flex items-center justify-between">
@@ -27,7 +30,15 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
           </Button>
           <Button variant="ghost" size="sm" className="text-foreground hover:text-primary">
             <User className="w-5 h-5" />
-            <span className="ml-2 text-sm">User</span>
+            <span className="ml-2 text-sm">{user?.email?.split('@')[0] || 'User'}</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={signOut}
+            className="text-foreground hover:text-destructive"
+          >
+            <LogOut className="w-5 h-5" />
           </Button>
         </div>
       </div>

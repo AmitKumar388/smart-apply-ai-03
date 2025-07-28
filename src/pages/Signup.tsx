@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '@/components/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export const Signup = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +17,13 @@ export const Signup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signUp, user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -38,18 +46,13 @@ export const Signup = () => {
       return;
     }
 
-    // Simulate registration
-    setTimeout(() => {
-      if (formData.name && formData.email && formData.password) {
-        localStorage.setItem('isAuthenticated', 'true');
-        toast({
-          title: "Account created!",
-          description: "Welcome to SmartApply.AI",
-        });
-        navigate('/dashboard');
-      }
-      setIsLoading(false);
-    }, 1000);
+    const { error } = await signUp(formData.email, formData.password, formData.name);
+    
+    if (!error) {
+      navigate('/dashboard');
+    }
+    
+    setIsLoading(false);
   };
 
   return (

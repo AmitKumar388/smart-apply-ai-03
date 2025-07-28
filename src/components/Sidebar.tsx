@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useLocation, Link } from 'react-router-dom';
 import { 
@@ -7,10 +7,13 @@ import {
   BarChart3, 
   User,
   Zap,
-  ChevronUp
+  ChevronUp,
+  ChevronDown,
+  Home
 } from 'lucide-react';
 
 const navigation = [
+  { name: 'Dashboard', href: '/dashboard', icon: Home, description: 'Overview & analytics' },
   { name: 'Resume Optimizer', href: '/dashboard/resume-optimizer', icon: FileText, description: 'AI-powered resume tailoring' },
   { name: 'Interview Practice', href: '/dashboard/interview-practice', icon: MessageSquare, description: 'STAR method practice' },
   { name: 'Application Tracker', href: '/dashboard/application-tracker', icon: BarChart3, description: 'Track your applications' },
@@ -19,22 +22,23 @@ const navigation = [
 
 export const Sidebar = () => {
   const location = useLocation();
+  const [proTipsVisible, setProTipsVisible] = useState(true);
 
   return (
     <div className="w-80 h-screen bg-background border-r border-border/50 flex flex-col">
       {/* Header */}
       <div className="p-6 border-b border-border/50">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+        <Link to="/dashboard" className="flex items-center space-x-3 group">
+          <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow group-hover:scale-105 transition-transform">
             <div className="w-6 h-6 bg-primary-foreground rounded-lg flex items-center justify-center">
               <div className="w-4 h-4 bg-primary rounded-sm"></div>
             </div>
           </div>
           <div>
-            <h1 className="text-lg font-bold text-foreground">SmartApply.AI</h1>
+            <h1 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">SmartApply.AI</h1>
             <p className="text-sm text-muted-foreground">AI Resume Assistant</p>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Tools Section */}
@@ -83,16 +87,25 @@ export const Sidebar = () => {
       {/* Pro Tips Section */}
       <div className="p-6 border-t border-border/50">
         <div className="bg-gradient-primary rounded-xl p-4 text-primary-foreground">
-          <div className="flex items-center justify-between mb-3">
+          <button 
+            onClick={() => setProTipsVisible(!proTipsVisible)}
+            className="flex items-center justify-between w-full mb-3 group"
+          >
             <div className="flex items-center space-x-2">
               <Zap className="w-4 h-4" />
               <span className="font-medium text-sm">Pro Tips</span>
             </div>
-            <ChevronUp className="w-4 h-4" />
-          </div>
-          <p className="text-xs leading-relaxed text-primary-foreground/90">
-            Upload your resume and paste job descriptions for AI-powered optimization
-          </p>
+            {proTipsVisible ? (
+              <ChevronUp className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            ) : (
+              <ChevronDown className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            )}
+          </button>
+          {proTipsVisible && (
+            <p className="text-xs leading-relaxed text-primary-foreground/90 animate-in slide-in-from-top-2 duration-200">
+              Upload your resume and paste job descriptions for AI-powered optimization
+            </p>
+          )}
         </div>
       </div>
     </div>
