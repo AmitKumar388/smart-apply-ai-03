@@ -6,6 +6,8 @@
   ],
   "compilerOptions": {
     "baseUrl": ".",
+    "lib": ["deno.ns", "dom"],
+    "types": ["deno.ns"],
     "paths": {
       "@/*": ["./src/*"]
     },
