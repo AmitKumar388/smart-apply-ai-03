@@ -12,6 +12,7 @@ import ResumeOptimizer from "./pages/ResumeOptimizer";
 import InterviewPractice from "./pages/InterviewPractice";
 import ApplicationTracker from "./pages/ApplicationTracker";
 import Portfolio from "./pages/Portfolio";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,11 @@ const App = () => (
             <Route path="/dashboard/portfolio" element={
               <DashboardLayout>
                 <Portfolio />
+              </DashboardLayout>
+            } />
+            <Route path="/dashboard/settings" element={
+              <DashboardLayout>
+                <Settings />
               </DashboardLayout>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

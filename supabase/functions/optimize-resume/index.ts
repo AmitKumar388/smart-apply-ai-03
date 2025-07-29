@@ -144,10 +144,10 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       optimization: {
         id: optimization.id,
-        optimizedResume,
-        coverLetter,
-        matchScore,
-        keywords
+        optimized_resume: optimizedResume,
+        cover_letter: coverLetter,
+        match_score: matchScore,
+        matched_keywords: keywords
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

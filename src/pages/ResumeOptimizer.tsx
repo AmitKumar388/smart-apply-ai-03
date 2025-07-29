@@ -75,7 +75,7 @@ export const ResumeOptimizer = () => {
       setOptimization(data.optimization);
       toast({
         title: "Resume optimized!",
-        description: `Match score: ${data.optimization.matchScore}%. Your resume has been optimized!`,
+        description: `Match score: ${data.optimization.match_score}%. Your resume has been optimized!`,
       });
     } catch (error) {
       console.error('Error optimizing resume:', error);
