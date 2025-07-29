@@ -1,73 +1,49 @@
-# Welcome to your Lovable project
+# 🚀 SmartApply.AI
 
-## Project info
+**SmartApply.AI** is a full-stack, AI-powered job application assistant that helps users tailor resumes and cover letters, practice interviews, and track job applications – all from one intuitive dashboard.
 
-**URL**: https://lovable.dev/projects/30b20423-6211-4f7f-a99d-28195c1c25a5
+---
 
-## How can I edit this code?
+## 📌 Features
 
-There are several ways of editing your application.
+- ✨ **AI Resume Optimizer**
+  - Upload your resume (PDF/DOCX)
+  - Paste job description
+  - Get tailored resume, cover letter, and match score using OpenAI GPT-4
 
-**Use Lovable**
+- 🧠 **AI Interview Practice**
+  - Generate STAR-based questions & sample answers based on job title
+  - Save and revisit questions
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/30b20423-6211-4f7f-a99d-28195c1c25a5) and start prompting.
+- 📊 **Application Tracker**
+  - Add job entries with notes
+  - Track progress (Applied, Interviewing, Rejected, Offer)
 
-Changes made via Lovable will be committed automatically to this repo.
+- 🌐 **Portfolio Builder**
+  - Auto-generate a portfolio using resume data
+  - Editable sections (Projects, Skills, Experience)
+  - Shareable public link
 
-**Use your preferred IDE**
+- 🔐 **User Authentication**
+  - Secure login/signup using JWT
+  - Passwords hashed using bcrypt
+  - Protected dashboard routes
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🛠️ Tech Stack
 
-Follow these steps:
+| Layer       | Technology                         |
+|------------|-------------------------------------|
+| Frontend    | React.js + Tailwind CSS + TypeScript |
+| Backend     | FastAPI (Python)                   |
+| AI Engine   | OpenAI GPT-4 via API               |
+| File Parsing| `pdfplumber`, `python-docx`        |
+| Auth        | JWT + bcrypt                       |
+| Database    | MongoDB                            |
+| Deployment  | Vercel (Frontend), Railway/Render (Backend) |
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 📁 Project Structure
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/30b20423-6211-4f7f-a99d-28195c1c25a5) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
