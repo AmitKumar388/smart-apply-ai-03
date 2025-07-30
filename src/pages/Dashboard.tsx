@@ -13,7 +13,7 @@ import {
 import { Link } from 'react-router-dom';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useRecentActivity } from '@/hooks/useRecentActivity';
-import { formatDistanceToNow } from 'date-fns';
+// import { formatDistanceToNow } from 'date-fns';
 
 const quickActions = [
   {
@@ -163,7 +163,7 @@ export const Dashboard = () => {
                         <h4 className="text-sm font-medium text-foreground">{activity.title}</h4>
                         <p className="text-xs text-muted-foreground mt-1">{activity.description}</p>
                         <p className="text-xs text-muted-foreground/70 mt-2">
-                          {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                          {new Date(activity.timestamp).toLocaleDateString()} {new Date(activity.timestamp).toLocaleTimeString()}
                         </p>
                       </div>
                     </div>
