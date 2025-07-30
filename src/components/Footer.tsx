@@ -15,8 +15,48 @@ export const Footer = () => {
   return (
     <footer className="bg-background border-t border-border/50 mt-auto">
       <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Newsletter & Trust Signals */}
+        <div className="bg-gradient-primary/10 rounded-xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-foreground">Stay Ahead of the Competition</h3>
+              <p className="text-muted-foreground">Get the latest job market insights, resume optimization tips, and exclusive features delivered to your inbox.</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input 
+                  type="email" 
+                  placeholder="Enter your email address" 
+                  className="flex-1 px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                />
+                <button className="px-8 py-3 bg-gradient-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all font-semibold shadow-glow">
+                  Get Started Free
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">No spam. Unsubscribe anytime. Join 50,000+ job seekers.</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary mb-1">50K+</div>
+                <div className="text-sm text-muted-foreground">Active Users</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary mb-1">95%</div>
+                <div className="text-sm text-muted-foreground">Success Rate</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary mb-1">1M+</div>
+                <div className="text-sm text-muted-foreground">Resumes Optimized</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary mb-1">4.9★</div>
+                <div className="text-sm text-muted-foreground">User Rating</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 p-8 mt-8">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
@@ -77,15 +117,15 @@ export const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground text-sm">support@smartapply.ai</span>
+                <span className="text-muted-foreground text-sm">amitkumarhzb75@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground text-sm">+1 (555) 123-4567</span>
+                <span className="text-muted-foreground text-sm">+91 9334571861</span>
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="w-4 h-4 text-muted-foreground" />
-                <span className="text-muted-foreground text-sm">San Francisco, CA</span>
+                <span className="text-muted-foreground text-sm">Indore, Madhya Pradesh</span>
               </div>
             </div>
           </div>
@@ -102,50 +142,12 @@ export const Footer = () => {
             <div className="flex items-center space-x-2 text-muted-foreground text-sm">
               <span>Made with</span>
               <Heart className="w-4 h-4 text-red-500 fill-current" />
-              <span>© 2024 SmartApply.AI. All rights reserved.</span>
+              <span>© 2025 SmartApply.AI. All rights reserved.</span>
             </div>
           </div>
         </div>
 
-        {/* Newsletter & Trust Signals */}
-        <div className="bg-gradient-primary/10 rounded-xl p-8 mt-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-foreground">Stay Ahead of the Competition</h3>
-              <p className="text-muted-foreground">Get the latest job market insights, resume optimization tips, and exclusive features delivered to your inbox.</p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input 
-                  type="email" 
-                  placeholder="Enter your email address" 
-                  className="flex-1 px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
-                <button className="px-8 py-3 bg-gradient-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all font-semibold shadow-glow">
-                  Get Started Free
-                </button>
-              </div>
-              <p className="text-xs text-muted-foreground">No spam. Unsubscribe anytime. Join 50,000+ job seekers.</p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">50K+</div>
-                <div className="text-sm text-muted-foreground">Active Users</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">95%</div>
-                <div className="text-sm text-muted-foreground">Success Rate</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">1M+</div>
-                <div className="text-sm text-muted-foreground">Resumes Optimized</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">4.9★</div>
-                <div className="text-sm text-muted-foreground">User Rating</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
     </footer>
   );

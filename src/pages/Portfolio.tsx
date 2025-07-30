@@ -34,7 +34,7 @@ const portfolioData = {
   title: 'Full Stack Developer',
   description: 'Passionate developer with expertise in modern web technologies and a strong foundation in computer science. Currently pursuing B.Tech while building innovative projects.',
   contact: {
-    email: 'amitkumar@email.com',
+    email: 'amitkumarhzb75@email.com',
     phone: '+91 9876543210',
     location: 'Indore, India'
   },

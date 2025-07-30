@@ -8,6 +8,56 @@
 
   <body>
     <div id="root"></div>
+
+    <section id="interview-generator">
+      <h2>Interview Question Generator</h2>
+      <input type="text" id="jobRole" placeholder="Enter Job Role" />
+      <input
+        type="text"
+        id="company"
+        placeholder="Enter Company Name (optional)"
+      />
+      <button onclick="generateQuestions()">Generate Questions</button>
+      <pre id="result">Output will appear here...</pre>
+    </section>
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+      async function generateQuestions() {
+        const jobRole = document.getElementById("jobRole").value.trim();
+        const company = document.getElementById("company").value.trim();
+        const resultEl = document.getElementById("result");
+
+        if (!jobRole) {
+          resultEl.innerText = "⚠️ Please enter a job role.";
+          return;
+        }
+
+        const prompt = `You are an expert interview coach. Generate 5 challenging but realistic interview questions for the job role: ${jobRole}${
+          company ? ` at ${company}` : ""
+        }. Each question should allow for STAR method answers. Return JSON with "question" and "category".`;
+
+        resultEl.innerText = "⏳ Generating questions...";
+
+        try {
+          const response = await puter.ai.chat(prompt, {
+            model: "gpt-4.1-nano",
+          });
+          let parsed;
+
+          try {
+            parsed = JSON.parse(response);
+          } catch {
+            resultEl.innerText =
+              "⚠️ Couldn't parse JSON. Raw output:\n\n" + response;
+            return;
+          }
+
+          resultEl.innerText = JSON.stringify(parsed, null, 2);
+        } catch (err) {
+          resultEl.innerText = "❌ Error: " + err.message;
+        }
+      }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

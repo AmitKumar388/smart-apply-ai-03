@@ -52,18 +52,13 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
         <div className="flex items-center space-x-3">
           {/* Notifications */}
           <div className="relative">
-            <Button 
-              variant="ghost" 
+            <Button  
               size="sm" 
-              className="text-foreground hover:text-primary relative"
+              className="text-gray-300 hover:text-gray-400"
               onClick={() => setShowNotifications(!showNotifications)}
             >
               <Bell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-destructive text-destructive-foreground">
-                  {unreadCount}
-                </Badge>
-              )}
+              
             </Button>
 
             {showNotifications && (
@@ -95,16 +90,15 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
           </div>
 
           {/* Settings */}
-          <Button variant="ghost" size="sm" className="text-foreground hover:text-primary">
+          <Button  size="sm" className="text-gray-300 hover:text-gray-400">
             <Settings className="w-5 h-5" />
           </Button>
 
           {/* User Menu */}
           <div className="relative">
             <Button 
-              variant="ghost" 
               size="sm" 
-              className="text-foreground hover:text-primary"
+              className="text-foreground hover:text-gray-400"
               onClick={() => setShowUserMenu(!showUserMenu)}
             >
               <User className="w-5 h-5" />
@@ -145,8 +139,8 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
       
       {subtitle && (
         <div className="mt-4">
-          <h1 className="text-3xl font-bold text-foreground mb-2">{title}</h1>
-          <p className="text-muted-foreground">{subtitle}</p>
+          <h1 className="text-3xl font-bold text-gray-300 mb-2">{title}</h1>
+          <p className="text-gray-400">{subtitle}</p>
         </div>
       )}
 
