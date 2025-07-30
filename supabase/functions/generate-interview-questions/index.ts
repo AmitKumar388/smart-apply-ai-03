@@ -1,35 +1,29 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import express from 'express';
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-dotenv.config(); // Load environment variables from .env file
-
-const openAIApiKey = process.env.OPENAI_API_KEY!;
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_ANON_KEY!;
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const app = express();
-app.use(express.json());
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
 
-app.options('*', (req, res) => {
-  res.set(corsHeaders);
-  res.sendStatus(204);
-});
-
-app.post('/', async (req, res) => {
   try {
-    const { jobRole, companyName } = req.body;
+    const { jobRole, companyName } = await req.json();
 
     // Get user from auth header
-    const authHeader = req.headers['authorization'];
+    const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('No authorization header');
     }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY')!;
 
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authHeader } }
@@ -102,16 +96,14 @@ app.post('/', async (req, res) => {
       throw new Error('Failed to save questions');
     }
 
-    res.set(corsHeaders);
-    res.status(200).json({ questions });
+    return new Response(JSON.stringify({ questions }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error: any) {
     console.error('Error in generate-interview-questions function:', error);
-    res.set(corsHeaders);
-    res.status(500).json({ error: error.message });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
 });

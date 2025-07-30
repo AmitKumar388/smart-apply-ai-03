@@ -1,12 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import express from 'express';
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-dotenv.config(); // Load environment variables from .env file
-
-const openAIApiKey = process.env.OPENAI_API_KEY!;
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_ANON_KEY!;
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -26,6 +20,10 @@ serve(async (req) => {
     if (!authHeader) {
       throw new Error('No authorization header');
     }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY')!;
 
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authHeader } }
@@ -163,6 +161,3 @@ serve(async (req) => {
   }
 });
 
-function serve(arg0: (req: any) => Promise<Response>) {
-  throw new Error("Function not implemented.");
-}
