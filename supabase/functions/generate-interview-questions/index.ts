@@ -1,11 +1,8 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import express from "express";
-import { createClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
-dotenv.config();
-
-const app = express();
-app.use(express.json());
+import express from 'express';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+dotenv.config(); // Load environment variables from .env file
 
 const openAIApiKey = process.env.OPENAI_API_KEY!;
 const supabaseUrl = process.env.SUPABASE_URL!;
@@ -16,19 +13,23 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-app.options("*", (_, res) => {
+const app = express();
+app.use(express.json());
+
+app.options('*', (req, res) => {
   res.set(corsHeaders);
   res.sendStatus(204);
 });
 
-app.post("/", async (req, res) => {
-  res.set(corsHeaders);
+app.post('/', async (req, res) => {
   try {
     const { jobRole, companyName } = req.body;
-    if (!jobRole) throw new Error("Job role is required");
 
-    const authHeader = req.headers["authorization"];
-    if (!authHeader) throw new Error("Missing Authorization header");
+    // Get user from auth header
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+      throw new Error('No authorization header');
+    }
 
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authHeader } },
@@ -120,14 +121,16 @@ app.post("/", async (req, res) => {
       throw new Error("Failed to save questions");
     }
 
+    res.set(corsHeaders);
     res.status(200).json({ questions });
-  } catch (err: any) {
-    console.error("Function Error:", err);
-    res.status(500).json({ error: err.message || "Internal Server Error" });
+  } catch (error: any) {
+    console.error('Error in generate-interview-questions function:', error);
+    res.set(corsHeaders);
+    res.status(500).json({ error: error.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

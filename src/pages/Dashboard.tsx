@@ -11,13 +11,9 @@ import {
   Clock
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const statCards = [
-  { title: 'Applications Tracked', value: '0', subtitle: 'Get started', color: 'text-blue-400' },
-  { title: 'Interviews Practiced', value: '0', subtitle: 'Start practicing', color: 'text-green-400' },
-  { title: 'Resumes Optimized', value: '0', subtitle: 'Upload resume', color: 'text-purple-400' },
-  { title: 'Match Score Avg', value: '0%', subtitle: 'No data yet', color: 'text-orange-400' },
-];
+import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useRecentActivity } from '@/hooks/useRecentActivity';
+// import { formatDistanceToNow } from 'date-fns';
 
 const quickActions = [
   {
@@ -55,6 +51,36 @@ const quickActions = [
 ];
 
 export const Dashboard = () => {
+  const stats = useDashboardStats();
+  const { activities, loading: activitiesLoading } = useRecentActivity();
+
+  const statCards = [
+    { 
+      title: 'Applications Tracked', 
+      value: stats.loading ? '...' : stats.applicationsTracked.toString(), 
+      subtitle: stats.applicationsTracked > 0 ? 'Active applications' : 'Get started', 
+      color: 'text-blue-400' 
+    },
+    { 
+      title: 'Interviews Practiced', 
+      value: stats.loading ? '...' : stats.interviewsPracticed.toString(), 
+      subtitle: stats.interviewsPracticed > 0 ? 'Questions generated' : 'Start practicing', 
+      color: 'text-green-400' 
+    },
+    { 
+      title: 'Resumes Optimized', 
+      value: stats.loading ? '...' : stats.resumesOptimized.toString(), 
+      subtitle: stats.resumesOptimized > 0 ? 'Optimizations done' : 'Upload resume', 
+      color: 'text-purple-400' 
+    },
+    { 
+      title: 'Match Score Avg', 
+      value: stats.loading ? '...' : `${stats.averageMatchScore}%`, 
+      subtitle: stats.averageMatchScore > 0 ? 'Average score' : 'No data yet', 
+      color: 'text-orange-400' 
+    },
+  ];
+
   return (
     <div>
       <DashboardHeader 
@@ -115,9 +141,36 @@ export const Dashboard = () => {
               <Clock className="w-5 h-5 text-muted-foreground" />
               <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
             </div>
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No recent activity yet. Start by optimizing your resume or practicing interviews!</p>
-            </div>
+            {activitiesLoading ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Loading recent activity...</p>
+              </div>
+            ) : activities.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No recent activity yet. Start by optimizing your resume or practicing interviews!</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {activities.map((activity) => {
+                  const IconComponent = activity.icon === 'FileText' ? FileText : 
+                                      activity.icon === 'MessageSquare' ? MessageSquare : BarChart3;
+                  return (
+                    <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                      <div className="p-2 rounded-lg bg-primary/10">
+                        <IconComponent className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-medium text-foreground">{activity.title}</h4>
+                        <p className="text-xs text-muted-foreground mt-1">{activity.description}</p>
+                        <p className="text-xs text-muted-foreground/70 mt-2">
+                          {new Date(activity.timestamp).toLocaleDateString()} {new Date(activity.timestamp).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </Card>
       </div>

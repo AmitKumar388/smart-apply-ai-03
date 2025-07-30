@@ -93,9 +93,10 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
               notifications.map((notification) => (
                 <div 
                   key={notification.id} 
-                  className={`p-3 rounded-lg border ${
+                  className={`p-3 rounded-lg border cursor-pointer hover:bg-secondary/50 transition-colors ${
                     notification.read ? 'bg-secondary/30' : 'bg-primary/5 border-primary/20'
                   }`}
+                  onClick={() => markAsRead(notification.id)}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-start gap-2 flex-1">
@@ -114,19 +115,15 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
                     </div>
                     <div className="flex items-center gap-1">
                       {!notification.read && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => markAsRead(notification.id)}
-                          className="h-6 w-6 p-0"
-                        >
-                          <CheckCircle className="w-3 h-3" />
-                        </Button>
+                        <div className="w-2 h-2 bg-primary rounded-full" />
                       )}
                       <Button 
                         variant="ghost" 
                         size="sm" 
-                        onClick={() => deleteNotification(notification.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteNotification(notification.id);
+                        }}
                         className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
                       >
                         <X className="w-3 h-3" />
@@ -136,6 +133,19 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
                 </div>
               ))
             )}
+          </div>
+          
+          <div className="mt-4 pt-3 border-t border-border/50">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full text-sm text-muted-foreground"
+              onClick={() => {
+                notifications.forEach(n => markAsRead(n.id));
+              }}
+            >
+              Mark all as read
+            </Button>
           </div>
         </div>
       </Card>

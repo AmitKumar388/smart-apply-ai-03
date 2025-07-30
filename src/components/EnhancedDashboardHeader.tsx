@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Bell, Settings, User, LogOut, Search, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { NotificationCenter } from '@/components/NotificationCenter';
 
 interface DashboardHeaderProps {
   title: string;
@@ -13,6 +13,7 @@ interface DashboardHeaderProps {
 
 export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -60,42 +61,18 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
             >
               <Bell className="w-5 h-5" />
               {unreadCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 text-xs bg-destructive text-destructive-foreground">
-                  {unreadCount}
-                </Badge>
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full" />
               )}
             </Button>
-
-            {showNotifications && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-card border border-border/50 rounded-lg shadow-glow z-50">
-                <div className="p-4 border-b border-border/50">
-                  <h3 className="font-semibold text-foreground">Notifications</h3>
-                </div>
-                <div className="max-h-96 overflow-y-auto">
-                  {notifications.map((notification) => (
-                    <div key={notification.id} className={`p-4 border-b border-border/30 hover:bg-secondary/30 cursor-pointer ${notification.unread ? 'bg-secondary/20' : ''}`}>
-                      <div className="flex items-start space-x-3">
-                        <div className={`w-2 h-2 rounded-full mt-2 ${notification.unread ? 'bg-primary' : 'bg-muted-foreground'}`} />
-                        <div className="flex-1">
-                          <h4 className="text-sm font-medium text-foreground">{notification.title}</h4>
-                          <p className="text-xs text-muted-foreground mt-1">{notification.message}</p>
-                          <span className="text-xs text-muted-foreground mt-2 block">{notification.time}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="p-3 border-t border-border/50">
-                  <Button variant="ghost" size="sm" className="w-full text-sm text-muted-foreground">
-                    View all notifications
-                  </Button>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Settings */}
-          <Button variant="ghost" size="sm" className="text-foreground hover:text-primary">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-foreground hover:text-primary"
+            onClick={() => navigate('/dashboard/settings')}
+          >
             <Settings className="w-5 h-5" />
           </Button>
 
@@ -118,11 +95,27 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                 </div>
                 <div className="p-2">
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-sm"
+                    onClick={() => {
+                      navigate('/dashboard/settings');
+                      setShowUserMenu(false);
+                    }}
+                  >
                     <User className="w-4 h-4 mr-2" />
                     Profile Settings
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start text-sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-sm"
+                    onClick={() => {
+                      navigate('/dashboard/settings');
+                      setShowUserMenu(false);
+                    }}
+                  >
                     <Settings className="w-4 h-4 mr-2" />
                     Preferences
                   </Button>
@@ -160,6 +153,12 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
           }}
         />
       )}
+
+      {/* Notification Center */}
+      <NotificationCenter 
+        isOpen={showNotifications} 
+        onClose={() => setShowNotifications(false)} 
+      />
     </header>
   );
 };
