@@ -19,16 +19,30 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Disable TypeScript checking in Vite to bypass tsconfig issues
+  // Completely disable TypeScript type checking to bypass invalid tsconfig
   esbuild: {
     target: "es2020",
-    // Skip TypeScript checking entirely
-    tsconfigRaw: '{}',
-  },
-  // Use only the app-specific tsconfig
-  build: {
-    rollupOptions: {
-      // Ignore the main tsconfig and use only tsconfig.app.json
-    }
+    tsconfigRaw: `{
+      "compilerOptions": {
+        "target": "ES2020",
+        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "module": "ESNext",
+        "skipLibCheck": true,
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "isolatedModules": true,
+        "moduleDetection": "force",
+        "noEmit": true,
+        "jsx": "react-jsx",
+        "strict": false,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noImplicitAny": false,
+        "baseUrl": ".",
+        "paths": {
+          "@/*": ["./src/*"]
+        }
+      }
+    }`,
   }
 }));
