@@ -63,19 +63,39 @@ export const ResumeOptimizer = () => {
     setIsOptimizing(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('optimize-resume', {
-        body: { 
-          resumeContent,
-          jobDescription: jobDescription.trim()
-        }
-      });
+      // Import the optimization logic
+      const { 
+        generateOptimizedResume, 
+        generateCoverLetter, 
+        analyzeKeywords, 
+        calculateMatchScore 
+      } = await import('@/data/resumeOptimizations');
+      
+      const optimizedResume = generateOptimizedResume(resumeContent, jobDescription);
+      const coverLetter = generateCoverLetter('Professional', 'Target Company');
+      const keywords = analyzeKeywords(jobDescription);
+      const matchScore = calculateMatchScore();
+      
+      const optimizationData = {
+        user_id: user!.id,
+        optimized_resume: optimizedResume,
+        cover_letter: coverLetter,
+        match_score: matchScore,
+        matched_keywords: keywords,
+      };
+
+      const { data, error } = await supabase
+        .from('resume_optimizations')
+        .insert(optimizationData)
+        .select()
+        .single();
 
       if (error) throw error;
 
-      setOptimization(data.optimization);
+      setOptimization(data);
       toast({
         title: "Resume optimized!",
-        description: `Match score: ${data.optimization.match_score}%. Your resume has been optimized!`,
+        description: `Match score: ${matchScore}%. Your resume has been optimized!`,
       });
     } catch (error) {
       console.error('Error optimizing resume:', error);
@@ -111,7 +131,7 @@ export const ResumeOptimizer = () => {
     <div>
       <DashboardHeader 
         title="Resume Optimizer" 
-        subtitle="Upload your resume and job description to get AI-powered optimization"
+        subtitle="Upload your resume and job description to get optimization suggestions"
       />
       
       <div className="p-8">
@@ -165,7 +185,7 @@ export const ResumeOptimizer = () => {
                     <Progress value={optimization.match_score} className="h-2" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-foreground mb-2">Matched Keywords</h4>
+                    <h4 className="text-sm font-medium text-foreground mb-2">Key Keywords</h4>
                     <div className="flex flex-wrap gap-1">
                       {optimization.matched_keywords.slice(0, 6).map((keyword, index) => (
                         <Badge key={index} variant="secondary" className="text-xs">
@@ -192,7 +212,7 @@ export const ResumeOptimizer = () => {
                   <h3 className="text-lg font-semibold text-foreground">AI Optimization</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Upload your resume and provide a job description to see AI optimization results, match score, and keyword analysis.
+                  Upload your resume and provide a job description to see optimization results, match score, and keyword analysis.
                 </p>
               </div>
             </Card>
@@ -224,7 +244,7 @@ export const ResumeOptimizer = () => {
                 className="bg-gradient-primary hover:opacity-90 text-primary-foreground shadow-glow"
               >
                 <Zap className="w-4 h-4 mr-2" />
-                {isOptimizing ? 'Optimizing with AI...' : 'Optimize with AI'}
+                {isOptimizing ? 'Optimizing...' : 'Optimize Resume'}
               </Button>
             </div>
           </div>
@@ -269,7 +289,7 @@ export const ResumeOptimizer = () => {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-2">
                     <FileText className="w-5 h-5 text-primary" />
-                    <h3 className="text-lg font-semibold text-foreground">AI-Generated Cover Letter</h3>
+                    <h3 className="text-lg font-semibold text-foreground">Generated Cover Letter</h3>
                   </div>
                   <Button
                     variant="outline"

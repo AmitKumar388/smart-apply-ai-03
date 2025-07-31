@@ -79,18 +79,28 @@ export const InterviewPractice = () => {
     setIsGenerating(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('generate-interview-questions', {
-        body: { 
-          jobRole: jobRole.trim(),
-          companyName: companyName.trim() || null
-        }
-      });
+      // Import the question generation logic
+      const { getQuestionsForRole } = await import('@/data/interviewQuestions');
+      const questionTemplates = getQuestionsForRole(jobRole.trim());
+      
+      // Create question objects with user data
+      const questionsToSave = questionTemplates.map((template) => ({
+        user_id: user!.id,
+        question: template.question,
+        category: template.category,
+        job_title: jobRole.trim(),
+        company_name: companyName.trim() || null,
+      }));
+
+      const { error } = await supabase
+        .from('interview_questions')
+        .insert(questionsToSave);
 
       if (error) throw error;
 
       toast({
         title: "Questions generated!",
-        description: `Generated ${data.questions.length} AI-powered interview questions.`,
+        description: `Generated ${questionTemplates.length} interview questions for ${jobRole}.`,
       });
       
       await fetchQuestions();
@@ -161,7 +171,7 @@ export const InterviewPractice = () => {
     <div>
       <DashboardHeader 
         title="Interview Practice" 
-        subtitle="Practice with AI-generated questions using the STAR method"
+        subtitle="Practice with curated questions using the STAR method"
       />
       
       <div className="p-8">
@@ -175,7 +185,7 @@ export const InterviewPractice = () => {
                   <h3 className="text-lg font-semibold text-foreground">Generate Questions</h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Enter the job details to get AI-generated interview questions
+                  Enter the job details to get relevant interview questions
                 </p>
                 
                 <div className="space-y-4">
@@ -208,7 +218,7 @@ export const InterviewPractice = () => {
                     disabled={isGenerating}
                     className="w-full bg-gradient-primary hover:opacity-90 text-primary-foreground shadow-glow"
                   >
-                    {isGenerating ? 'Generating Questions...' : 'Generate AI Questions'}
+                    {isGenerating ? 'Generating Questions...' : 'Generate Questions'}
                   </Button>
                 </div>
               </div>
@@ -318,7 +328,7 @@ export const InterviewPractice = () => {
                   <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-foreground mb-2">No Questions Generated Yet</h3>
                   <p className="text-muted-foreground">
-                    Enter a job role above to start generating AI-powered interview questions.
+                    Enter a job role above to start generating interview questions.
                   </p>
                 </div>
               </div>
