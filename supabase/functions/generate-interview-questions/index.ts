@@ -53,7 +53,7 @@ app.post('/', async (req, res) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4.1-nano",
+        model: "gpt-4.1-2025-04-14",
         messages: [
           {
             role: "system",
