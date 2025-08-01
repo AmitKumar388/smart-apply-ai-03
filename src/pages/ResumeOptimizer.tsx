@@ -78,6 +78,7 @@ export const ResumeOptimizer = () => {
       
       const optimizationData = {
         user_id: user!.id,
+        job_description: jobDescription.trim(),
         optimized_resume: optimizedResume,
         cover_letter: coverLetter,
         match_score: matchScore,

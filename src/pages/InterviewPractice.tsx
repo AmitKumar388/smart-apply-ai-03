@@ -87,7 +87,6 @@ export const InterviewPractice = () => {
       const questionsToSave = questionTemplates.map((template) => ({
         user_id: user!.id,
         question: template.question,
-        category: template.category,
         job_title: jobRole.trim(),
         company_name: companyName.trim() || null,
       }));
