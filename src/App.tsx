@@ -12,7 +12,10 @@ import ResumeOptimizer from "./pages/ResumeOptimizer";
 import InterviewPractice from "./pages/InterviewPractice";
 import ApplicationTracker from "./pages/ApplicationTracker";
 import Portfolio from "./pages/Portfolio";
-import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
+import NotificationSettings from "./pages/NotificationSettings";
+import Privacy from "./pages/Privacy";
+import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,9 +56,24 @@ const App = () => (
                 <Portfolio />
               </DashboardLayout>
             } />
-            <Route path="/dashboard/settings" element={
+            <Route path="/dashboard/profile" element={
               <DashboardLayout>
-                <Settings />
+                <Profile />
+              </DashboardLayout>
+            } />
+            <Route path="/dashboard/notifications" element={
+              <DashboardLayout>
+                <NotificationSettings />
+              </DashboardLayout>
+            } />
+            <Route path="/dashboard/privacy" element={
+              <DashboardLayout>
+                <Privacy />
+              </DashboardLayout>
+            } />
+            <Route path="/dashboard/account" element={
+              <DashboardLayout>
+                <Account />
               </DashboardLayout>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

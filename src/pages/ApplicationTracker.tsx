@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +6,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Building, MapPin, Calendar } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { Plus, Building, MapPin, Calendar, Loader2 } from 'lucide-react';
 
 interface Application {
   id: string;
@@ -18,8 +20,11 @@ interface Application {
 }
 
 export const ApplicationTracker = () => {
+  const { user } = useAuth();
   const [applications, setApplications] = useState<Application[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     company: '',
     role: '',
@@ -28,7 +33,45 @@ export const ApplicationTracker = () => {
   });
   const { toast } = useToast();
 
-  const handleAddApplication = () => {
+  useEffect(() => {
+    if (user) {
+      loadApplications();
+    }
+  }, [user]);
+
+  const loadApplications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('job_applications')
+        .select('*')
+        .eq('user_id', user!.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      const formattedApplications = data?.map(app => ({
+        id: app.id,
+        company: app.company_name,
+        role: app.job_title,
+        status: app.status,
+        appliedDate: new Date(app.applied_date || app.created_at).toLocaleDateString(),
+        notes: app.notes || ''
+      })) || [];
+      
+      setApplications(formattedApplications);
+    } catch (error) {
+      console.error('Error loading applications:', error);
+      toast({
+        title: "Error loading applications",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddApplication = async () => {
     if (!formData.company || !formData.role) {
       toast({
         title: "Missing information",
@@ -38,23 +81,50 @@ export const ApplicationTracker = () => {
       return;
     }
 
-    const newApplication: Application = {
-      id: Date.now().toString(),
-      company: formData.company,
-      role: formData.role,
-      status: formData.status,
-      appliedDate: new Date().toLocaleDateString(),
-      notes: formData.notes
-    };
+    setSaving(true);
+    try {
+      const { data, error } = await supabase
+        .from('job_applications')
+        .insert({
+          user_id: user!.id,
+          company_name: formData.company.trim(),
+          job_title: formData.role.trim(),
+          status: formData.status,
+          notes: formData.notes.trim() || null,
+          applied_date: new Date().toISOString().split('T')[0]
+        })
+        .select()
+        .single();
 
-    setApplications(prev => [newApplication, ...prev]);
-    setFormData({ company: '', role: '', status: 'Applied', notes: '' });
-    setShowAddForm(false);
-    
-    toast({
-      title: "Application added",
-      description: `${formData.role} at ${formData.company} has been added to your tracker.`,
-    });
+      if (error) throw error;
+
+      const newApplication: Application = {
+        id: data.id,
+        company: data.company_name,
+        role: data.job_title,
+        status: data.status,
+        appliedDate: new Date(data.applied_date).toLocaleDateString(),
+        notes: data.notes || ''
+      };
+
+      setApplications(prev => [newApplication, ...prev]);
+      setFormData({ company: '', role: '', status: 'Applied', notes: '' });
+      setShowAddForm(false);
+      
+      toast({
+        title: "Application added",
+        description: `${formData.role} at ${formData.company} has been saved to your dashboard.`,
+      });
+    } catch (error) {
+      console.error('Error saving application:', error);
+      toast({
+        title: "Error saving application",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const statusColors = {
@@ -72,22 +142,29 @@ export const ApplicationTracker = () => {
       />
       
       <div className="p-8">
-        {/* Add New Application */}
-        <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm mb-8">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
-                <Plus className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-semibold text-foreground">Add New Application</h3>
-              </div>
-              <Button 
-                onClick={() => setShowAddForm(!showAddForm)}
-                variant="outline"
-                className="border-border/50 text-foreground hover:bg-secondary/50"
-              >
-                {showAddForm ? 'Cancel' : 'Add Application'}
-              </Button>
-            </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <>
+            {/* Add New Application */}
+            <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm mb-8">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <Plus className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-semibold text-foreground">Add New Application</h3>
+                  </div>
+                  <Button 
+                    onClick={() => setShowAddForm(!showAddForm)}
+                    variant="outline"
+                    className="border-border/50 text-foreground hover:bg-secondary/50"
+                    disabled={saving}
+                  >
+                    {showAddForm ? 'Cancel' : 'Add Application'}
+                  </Button>
+                </div>
             
             {showAddForm && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
@@ -140,8 +217,16 @@ export const ApplicationTracker = () => {
                   <Button 
                     onClick={handleAddApplication}
                     className="bg-gradient-primary hover:opacity-90 text-primary-foreground shadow-glow"
+                    disabled={saving}
                   >
-                    Add Application
+                    {saving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Add Application'
+                    )}
                   </Button>
                 </div>
               </div>
@@ -196,6 +281,8 @@ export const ApplicationTracker = () => {
               </Button>
             </div>
           </Card>
+        )}
+          </>
         )}
       </div>
     </div>

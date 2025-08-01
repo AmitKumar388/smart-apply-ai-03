@@ -66,33 +66,36 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
             </Button>
           </div>
 
-          {/* Settings */}
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-foreground hover:text-primary"
-            onClick={() => navigate('/dashboard/settings')}
-          >
-            <Settings className="w-5 h-5" />
-          </Button>
-
           {/* User Menu */}
           <div className="relative">
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-foreground hover:text-primary"
+              className="text-foreground hover:text-primary flex items-center space-x-2"
               onClick={() => setShowUserMenu(!showUserMenu)}
             >
-              <User className="w-5 h-5" />
-              <span className="ml-2 text-sm hidden sm:block">{user?.email?.split('@')[0] || 'User'}</span>
+              <div className="w-6 h-6 bg-gradient-primary rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-primary-foreground">
+                  {user?.email?.charAt(0).toUpperCase() || 'U'}
+                </span>
+              </div>
+              <span className="text-sm hidden sm:block">{user?.email?.split('@')[0] || 'User'}</span>
             </Button>
 
             {showUserMenu && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-card border border-border/50 rounded-lg shadow-glow z-50">
-                <div className="p-3 border-b border-border/50">
-                  <p className="text-sm font-medium text-foreground">{user?.email?.split('@')[0] || 'User'}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
+              <div className="absolute right-0 top-full mt-2 w-64 bg-card border border-border/50 rounded-lg shadow-glow z-50">
+                <div className="p-4 border-b border-border/50">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
+                      <span className="text-sm font-bold text-primary-foreground">
+                        {user?.email?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{user?.email?.split('@')[0] || 'User'}</p>
+                      <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    </div>
+                  </div>
                 </div>
                 <div className="p-2">
                   <Button 
@@ -100,24 +103,48 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
                     size="sm" 
                     className="w-full justify-start text-sm"
                     onClick={() => {
-                      navigate('/dashboard/settings');
+                      navigate('/dashboard/profile');
                       setShowUserMenu(false);
                     }}
                   >
                     <User className="w-4 h-4 mr-2" />
-                    Profile Settings
+                    Profile
                   </Button>
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     className="w-full justify-start text-sm"
                     onClick={() => {
-                      navigate('/dashboard/settings');
+                      navigate('/dashboard/notifications');
+                      setShowUserMenu(false);
+                    }}
+                  >
+                    <Bell className="w-4 h-4 mr-2" />
+                    Notifications
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-sm"
+                    onClick={() => {
+                      navigate('/dashboard/privacy');
                       setShowUserMenu(false);
                     }}
                   >
                     <Settings className="w-4 h-4 mr-2" />
-                    Preferences
+                    Privacy & Security
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-sm"
+                    onClick={() => {
+                      navigate('/dashboard/account');
+                      setShowUserMenu(false);
+                    }}
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Account Settings
                   </Button>
                   <div className="border-t border-border/50 my-2" />
                   <Button 

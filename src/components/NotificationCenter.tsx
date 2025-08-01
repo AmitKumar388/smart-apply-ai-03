@@ -71,80 +71,101 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ isOpen, 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center pt-20">
-      <Card className="w-full max-w-md bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <Bell className="w-5 h-5" />
-              Notifications
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-lg h-[80vh] bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm flex flex-col">
+        <div className="p-6 border-b border-border/50 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
+              <Bell className="w-6 h-6 text-primary" />
+              All Notifications
             </h3>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="w-4 h-4" />
+            <Button variant="ghost" size="sm" onClick={onClose} className="text-muted-foreground hover:text-foreground">
+              <X className="w-5 h-5" />
             </Button>
           </div>
-          
-          <div className="space-y-3 max-h-96 overflow-y-auto">
+          <p className="text-sm text-muted-foreground mt-2">
+            {notifications.filter(n => !n.read).length} unread notifications
+          </p>
+        </div>
+        
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full overflow-y-auto p-6 space-y-4">
             {notifications.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No notifications
-              </p>
+              <div className="flex flex-col items-center justify-center h-full text-center">
+                <Bell className="w-16 h-16 text-muted-foreground/50 mb-4" />
+                <h4 className="text-lg font-medium text-foreground mb-2">No notifications</h4>
+                <p className="text-muted-foreground">You're all caught up!</p>
+              </div>
             ) : (
               notifications.map((notification) => (
                 <div 
                   key={notification.id} 
-                  className={`p-3 rounded-lg border cursor-pointer hover:bg-secondary/50 transition-colors ${
-                    notification.read ? 'bg-secondary/30' : 'bg-primary/5 border-primary/20'
+                  className={`p-4 rounded-lg border cursor-pointer hover:bg-secondary/50 transition-all duration-200 ${
+                    notification.read 
+                      ? 'bg-secondary/20 border-border/30' 
+                      : 'bg-primary/5 border-primary/20 shadow-sm'
                   }`}
                   onClick={() => markAsRead(notification.id)}
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2 flex-1">
-                      {getIcon(notification.type)}
-                      <div className="flex-1">
-                        <h4 className="text-sm font-medium text-foreground">
-                          {notification.title}
-                        </h4>
-                        <p className="text-xs text-muted-foreground mt-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="flex-shrink-0 mt-1">
+                        {getIcon(notification.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <h4 className="text-sm font-semibold text-foreground leading-tight">
+                            {notification.title}
+                          </h4>
+                          {!notification.read && (
+                            <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1" />
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground leading-relaxed mb-3">
                           {notification.message}
                         </p>
-                        <p className="text-xs text-muted-foreground/70 mt-2">
+                        <p className="text-xs text-muted-foreground/70">
                           {notification.timestamp}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      {!notification.read && (
-                        <div className="w-2 h-2 bg-primary rounded-full" />
-                      )}
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteNotification(notification.id);
-                        }}
-                        className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteNotification(notification.id);
+                      }}
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               ))
             )}
           </div>
-          
-          <div className="mt-4 pt-3 border-t border-border/50">
+        </div>
+        
+        <div className="p-6 border-t border-border/50 flex-shrink-0">
+          <div className="flex gap-3">
             <Button 
-              variant="ghost" 
+              variant="outline" 
               size="sm" 
-              className="w-full text-sm text-muted-foreground"
+              className="flex-1 text-sm"
               onClick={() => {
-                notifications.forEach(n => markAsRead(n.id));
+                setNotifications(prev => prev.map(n => ({ ...n, read: true })));
               }}
             >
               Mark all as read
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1 text-sm"
+              onClick={() => setNotifications([])}
+            >
+              Clear all
             </Button>
           </div>
         </div>
