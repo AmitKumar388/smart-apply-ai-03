@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { DashboardHeader } from '@/components/DashboardHeader';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { useVoice } from '@/hooks/useVoice';
-import { supabase } from '@/integrations/supabase/client';
-import { generateInterviewQuestions, generateAnswer } from '@/lib/gemini';
+import { DashboardHeader } from '../components/DashboardHeader';
+import { Card } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Badge } from '../components/ui/badge';
+import { Textarea } from '../components/ui/textarea';
+import { useToast } from '../hooks/use-toast';
+import { useAuth } from '../hooks/useAuth';
+import { useVoice } from '../hooks/useVoice';
+import { supabase } from '../integrations/supabase/client';
+import { generateInterviewQuestions, generateAnswer } from '../lib/gemini';
 import { MessageSquare, Mic, MicOff, Volume2, VolumeX, Save, Play, Pause } from 'lucide-react';
 
 const interviewTips = [
@@ -76,7 +76,12 @@ export const InterviewPractice = () => {
     if (error) {
       console.error('Error fetching questions:', error);
     } else {
-      setQuestions(data || []);
+      setQuestions(
+        (data || []).map((q) => ({
+          ...q,
+          company_name: q.company_name === null ? undefined : q.company_name,
+        }))
+      );
     }
   };
 
@@ -157,7 +162,7 @@ export const InterviewPractice = () => {
         .update({ 
           user_answer: userAnswer.trim(),
           ai_suggestion: aiSuggestion 
-        })
+        } as any)
         .eq('id', questions[currentQuestionIndex].id);
 
       if (error) throw error;

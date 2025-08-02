@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { DashboardHeader } from '@/components/DashboardHeader';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { DashboardHeader } from '../components/DashboardHeader';
+import { Card } from '../components/ui/card';
+import { Button } from '../components/ui/button';
 import { 
   FileText, 
   MessageSquare, 
@@ -13,8 +13,8 @@ import {
   Eye
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useDashboardStats } from '@/hooks/useDashboardStats';
-import { useRecentActivity } from '@/hooks/useRecentActivity';
+import { useDashboardStats } from '../hooks/useDashboardStats';
+import { useRecentActivity } from '../hooks/useRecentActivity';
 // import { formatDistanceToNow } from 'date-fns';
 
 const quickActions = [
@@ -156,14 +156,7 @@ export const Dashboard = () => {
                   {hideActivities ? <Eye className="w-4 h-4 mr-2" /> : <EyeOff className="w-4 h-4 mr-2" />}
                   {hideActivities ? 'Show' : 'Hide'}
                 </Button>
-                <Button
-                  onClick={() => setShowAllActivities(!showAllActivities)}
-                  variant="outline"
-                  size="sm"
-                  className="border-border/50"
-                >
-                  {showAllActivities ? 'Show Less' : 'See All'}
-                </Button>
+                
               </div>
             </div>
             {hideActivities ? (

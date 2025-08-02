@@ -1,11 +1,12 @@
 import React from 'react';
-import { DashboardHeader } from '@/components/DashboardHeader';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { DashboardHeader } from '../components/DashboardHeader';
+import { Card } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../hooks/use-toast';
 import { User, Download, Trash2, CreditCard, Calendar } from 'lucide-react';
+import { Label } from '@radix-ui/react-label';
 
 export const Account = () => {
   const { user } = useAuth();
@@ -122,7 +123,7 @@ export const Account = () => {
           </div>
         </Card>
 
-        <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm max-w-2xl border-destructive/20">
+        <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm max-w-2xl">
           <div className="p-6">
             <div className="flex items-center space-x-2 mb-6">
               <Trash2 className="w-5 h-5 text-destructive" />

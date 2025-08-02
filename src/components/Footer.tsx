@@ -14,49 +14,10 @@ import {
 export const Footer = () => {
   return (
     <footer className="bg-background border-t border-border/50 mt-auto">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Newsletter & Trust Signals */}
-        <div className="bg-gradient-primary/10 rounded-xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-foreground">Stay Ahead of the Competition</h3>
-              <p className="text-muted-foreground">Get the latest job market insights, resume optimization tips, and exclusive features delivered to your inbox.</p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <input 
-                  type="email" 
-                  placeholder="Enter your email address" 
-                  className="flex-1 px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
-                <button className="px-8 py-3 bg-gradient-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all font-semibold shadow-glow">
-                  Get Started Free
-                </button>
-              </div>
-              <p className="text-xs text-muted-foreground">No spam. Unsubscribe anytime. Join 50,000+ job seekers.</p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">50K+</div>
-                <div className="text-sm text-muted-foreground">Active Users</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">95%</div>
-                <div className="text-sm text-muted-foreground">Success Rate</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">1M+</div>
-                <div className="text-sm text-muted-foreground">Resumes Optimized</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1">4.9★</div>
-                <div className="text-sm text-muted-foreground">User Rating</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="max-w-7xl mx-auto">
 
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 p-8 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-15 p-8 mt-6">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
@@ -86,30 +47,30 @@ export const Footer = () => {
               </a>
             </div>
           </div>
-
-          {/* Product */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Product</h3>
-            <ul className="space-y-3">
-              <li><Link to="/dashboard/resume-optimizer" className="text-muted-foreground hover:text-primary transition-colors text-sm">Resume Optimizer</Link></li>
-              <li><Link to="/dashboard/interview-practice" className="text-muted-foreground hover:text-primary transition-colors text-sm">Interview Practice</Link></li>
-              <li><Link to="/dashboard/application-tracker" className="text-muted-foreground hover:text-primary transition-colors text-sm">Application Tracker</Link></li>
-              <li><Link to="/dashboard/portfolio" className="text-muted-foreground hover:text-primary transition-colors text-sm">Portfolio Builder</Link></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">API Documentation</a></li>
-            </ul>
+<div className="bg-gradient-primary/10 rounded-xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            
+            
+            <div className="grid grid-cols-2 gap-8 ">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary mb-1 ml-5">50K+</div>
+                <div className="text-sm text-muted-foreground ml-5">Active Users</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary mb-1 ml-20">95%</div>
+                <div className="text-sm text-muted-foreground ml-20">Success Rate</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary mb-1 ml-5">1M+</div>
+                <div className="text-sm text-muted-foreground ml-5">Resumes Optimized</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-primary mb-1 ml-20">4.9★</div>
+                <div className="text-sm text-muted-foreground ml-20">User Rating</div>
+              </div>
+            </div>
           </div>
-
-          {/* Support */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-foreground">Support</h3>
-            <ul className="space-y-3">
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">Help Center</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">Contact Support</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">Feature Requests</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">Status Page</a></li>
-              <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors text-sm">Community Forum</a></li>
-            </ul>
-          </div>
+        </div>
 
           {/* Contact */}
           <div className="space-y-4">

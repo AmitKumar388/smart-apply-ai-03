@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { DashboardHeader } from '@/components/DashboardHeader';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
+import { DashboardHeader } from '../components/DashboardHeader';
+import { Card } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Label } from '../components/ui/label';
+import { Switch } from '../components/ui/switch';
+import { useToast } from '../hooks/use-toast';
 import { Bell, Mail, Smartphone, Calendar } from 'lucide-react';
 
 export const NotificationSettings = () => {

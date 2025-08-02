@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Bell, Settings, User, LogOut, Search, Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Badge } from '../components/ui/badge';
+import { useAuth } from '../hooks/useAuth';
 import { Link } from 'react-router-dom';
 
 interface DashboardHeaderProps {
@@ -89,11 +89,6 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
             )}
           </div>
 
-          {/* Settings */}
-          <Button  size="sm" className="text-gray-300 hover:text-gray-400">
-            <Settings className="w-5 h-5" />
-          </Button>
-
           {/* User Menu */}
           <div className="relative">
             <Button 
@@ -111,11 +106,13 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
                   <p className="text-sm font-medium text-foreground">{user?.email?.split('@')[0] || 'User'}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                 </div>
-                <div className="p-2">
+                <div className="p-2"> 
+                  <Link to="/account">
                   <Button variant="ghost" size="sm" className="w-full justify-start text-sm">
                     <User className="w-4 h-4 mr-2" />
                     Profile Settings
                   </Button>
+                  </Link>
                   <Button variant="ghost" size="sm" className="w-full justify-start text-sm">
                     <Settings className="w-4 h-4 mr-2" />
                     Preferences
