@@ -8,7 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Upload, FileText, Zap, AlertCircle, Download, Copy, Check, Star } from 'lucide-react';
+import { optimizeResume } from '@/lib/gemini';
+import { Upload, FileText, Zap, AlertCircle, Copy, Check, Star, Sparkles } from 'lucide-react';
 
 interface ResumeOptimization {
   id: string;
@@ -51,10 +52,10 @@ export const ResumeOptimizer = () => {
   };
 
   const handleOptimize = async () => {
-    if (!selectedFile || !jobDescription.trim()) {
+    if (!resumeContent.trim() || !jobDescription.trim()) {
       toast({
         title: "Missing information",
-        description: "Please upload a resume and provide a job description.",
+        description: "Please provide both resume content and job description.",
         variant: "destructive",
       });
       return;
@@ -63,26 +64,24 @@ export const ResumeOptimizer = () => {
     setIsOptimizing(true);
     
     try {
-      // Import the optimization logic
-      const { 
-        generateOptimizedResume, 
-        generateCoverLetter, 
-        analyzeKeywords, 
-        calculateMatchScore 
-      } = await import('@/data/resumeOptimizations');
-      
-      const optimizedResume = generateOptimizedResume(resumeContent, jobDescription);
-      const coverLetter = generateCoverLetter('Professional', 'Target Company');
-      const keywords = analyzeKeywords(jobDescription);
-      const matchScore = calculateMatchScore();
+      const result = await optimizeResume(resumeContent, jobDescription);
       
       const optimizationData = {
         user_id: user!.id,
         job_description: jobDescription.trim(),
-        optimized_resume: optimizedResume,
-        cover_letter: coverLetter,
-        match_score: matchScore,
-        matched_keywords: keywords,
+        optimized_resume: result.optimizedResume,
+        cover_letter: `Dear Hiring Manager,
+
+I am writing to express my interest in the position at your company. Based on my experience and skills, I believe I would be a valuable addition to your team.
+
+${result.improvements}
+
+I look forward to the opportunity to discuss how my background aligns with your needs.
+
+Best regards,
+[Your Name]`,
+        match_score: result.matchScore,
+        matched_keywords: result.keywords,
       };
 
       const { data, error } = await supabase
@@ -96,7 +95,7 @@ export const ResumeOptimizer = () => {
       setOptimization(data);
       toast({
         title: "Resume optimized!",
-        description: `Match score: ${matchScore}%. Your resume has been optimized!`,
+        description: `Match score: ${result.matchScore}%. Your resume has been optimized with AI!`,
       });
     } catch (error) {
       console.error('Error optimizing resume:', error);
@@ -141,31 +140,19 @@ export const ResumeOptimizer = () => {
           <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
             <div className="p-6">
               <div className="flex items-center space-x-2 mb-4">
-                <Upload className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-semibold text-foreground">Upload Resume</h3>
+                <Sparkles className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold text-foreground">Resume Content</h3>
               </div>
               <p className="text-sm text-muted-foreground mb-6">
-                Upload your current resume (.pdf or .docx)
+                Paste or type your resume content below
               </p>
               
-              <div className="border-2 border-dashed border-border/50 rounded-xl p-8 text-center">
-                <input
-                  type="file"
-                  accept=".pdf,.docx"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="resume-upload"
-                />
-                <label htmlFor="resume-upload" className="cursor-pointer">
-                  <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-sm text-foreground mb-2">
-                    {selectedFile ? selectedFile.name : 'Click to upload resume'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    PDF or DOCX up to 10MB
-                  </p>
-                </label>
-              </div>
+              <Textarea
+                value={resumeContent}
+                onChange={(e) => setResumeContent(e.target.value)}
+                placeholder="Paste your resume content here..."
+                className="min-h-[300px] bg-secondary/50 border-border/50 text-foreground resize-none"
+              />
             </div>
           </Card>
 
@@ -241,11 +228,11 @@ export const ResumeOptimizer = () => {
             <div className="mt-6">
               <Button 
                 onClick={handleOptimize}
-                disabled={isOptimizing || !selectedFile || !jobDescription.trim()}
+                disabled={isOptimizing || !resumeContent.trim() || !jobDescription.trim()}
                 className="bg-gradient-primary hover:opacity-90 text-primary-foreground shadow-glow"
               >
-                <Zap className="w-4 h-4 mr-2" />
-                {isOptimizing ? 'Optimizing...' : 'Optimize Resume'}
+                <Sparkles className="w-4 h-4 mr-2" />
+                {isOptimizing ? 'Optimizing with AI...' : 'Optimize with Gemini AI'}
               </Button>
             </div>
           </div>
