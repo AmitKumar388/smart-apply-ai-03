@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Building, MapPin, Calendar, Loader2 } from 'lucide-react';
+import { Plus, Building, MapPin, Calendar, Loader2, Edit, Trash2 } from 'lucide-react';
 
 interface Application {
   id: string;
@@ -19,13 +19,27 @@ interface Application {
   notes: string;
 }
 
+interface EditFormData {
+  company: string;
+  role: string;
+  status: string;
+  notes: string;
+}
+
 export const ApplicationTracker = () => {
   const { user } = useAuth();
   const [applications, setApplications] = useState<Application[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
+    company: '',
+    role: '',
+    status: 'Applied',
+    notes: ''
+  });
+  const [editFormData, setEditFormData] = useState<EditFormData>({
     company: '',
     role: '',
     status: 'Applied',
@@ -119,6 +133,103 @@ export const ApplicationTracker = () => {
       console.error('Error saving application:', error);
       toast({
         title: "Error saving application",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEditClick = (app: Application) => {
+    setEditingId(app.id);
+    setEditFormData({
+      company: app.company,
+      role: app.role,
+      status: app.status,
+      notes: app.notes
+    });
+  };
+
+  const handleUpdateApplication = async (id: string) => {
+    if (!editFormData.company || !editFormData.role) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in company and role.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('job_applications')
+        .update({
+          company_name: editFormData.company.trim(),
+          job_title: editFormData.role.trim(),
+          status: editFormData.status,
+          notes: editFormData.notes.trim() || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('user_id', user!.id);
+
+      if (error) throw error;
+
+      setApplications(prev => prev.map(app => 
+        app.id === id 
+          ? {
+              ...app,
+              company: editFormData.company,
+              role: editFormData.role,
+              status: editFormData.status,
+              notes: editFormData.notes
+            }
+          : app
+      ));
+      
+      setEditingId(null);
+      toast({
+        title: "Application updated",
+        description: "Your application has been successfully updated.",
+      });
+    } catch (error) {
+      console.error('Error updating application:', error);
+      toast({
+        title: "Error updating application",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteApplication = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this application?')) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('job_applications')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user!.id);
+
+      if (error) throw error;
+
+      setApplications(prev => prev.filter(app => app.id !== id));
+      toast({
+        title: "Application deleted",
+        description: "The application has been removed.",
+      });
+    } catch (error) {
+      console.error('Error deleting application:', error);
+      toast({
+        title: "Error deleting application",
         description: "Please try again later.",
         variant: "destructive",
       });
@@ -240,27 +351,109 @@ export const ApplicationTracker = () => {
             {applications.map((app) => (
               <Card key={app.id} className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
                 <div className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <Building className="w-5 h-5 text-primary" />
-                        <h3 className="text-lg font-semibold text-foreground">{app.role}</h3>
-                      </div>
-                      <p className="text-muted-foreground mb-3">{app.company}</p>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-3">
-                        <div className="flex items-center space-x-1">
-                          <Calendar className="w-4 h-4" />
-                          <span>Applied: {app.appliedDate}</span>
+                  {editingId === app.id ? (
+                    // Edit Form
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-2 block">Company</label>
+                          <Input
+                            value={editFormData.company}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, company: e.target.value }))}
+                            className="bg-secondary/50 border-border/50 text-foreground"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-2 block">Role</label>
+                          <Input
+                            value={editFormData.role}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, role: e.target.value }))}
+                            className="bg-secondary/50 border-border/50 text-foreground"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-foreground mb-2 block">Status</label>
+                          <Select value={editFormData.status} onValueChange={(value) => setEditFormData(prev => ({ ...prev, status: value }))}>
+                            <SelectTrigger className="bg-secondary/50 border-border/50 text-foreground">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Applied">Applied</SelectItem>
+                              <SelectItem value="Interviewing">Interviewing</SelectItem>
+                              <SelectItem value="Rejected">Rejected</SelectItem>
+                              <SelectItem value="Offer">Offer</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="text-sm font-medium text-foreground mb-2 block">Notes</label>
+                          <Textarea
+                            value={editFormData.notes}
+                            onChange={(e) => setEditFormData(prev => ({ ...prev, notes: e.target.value }))}
+                            className="bg-secondary/50 border-border/50 text-foreground"
+                          />
                         </div>
                       </div>
-                      {app.notes && (
-                        <p className="text-sm text-muted-foreground">{app.notes}</p>
-                      )}
+                      <div className="flex space-x-2">
+                        <Button 
+                          onClick={() => handleUpdateApplication(app.id)}
+                          className="bg-gradient-primary hover:opacity-90 text-primary-foreground shadow-glow"
+                          disabled={saving}
+                          size="sm"
+                        >
+                          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                        </Button>
+                        <Button 
+                          onClick={() => setEditingId(null)}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
-                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[app.status as keyof typeof statusColors]}`}>
-                      {app.status}
+                  ) : (
+                    // Display View
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <Building className="w-5 h-5 text-primary" />
+                          <h3 className="text-lg font-semibold text-foreground">{app.role}</h3>
+                        </div>
+                        <p className="text-muted-foreground mb-3">{app.company}</p>
+                        <div className="flex items-center space-x-4 text-sm text-muted-foreground mb-3">
+                          <div className="flex items-center space-x-1">
+                            <Calendar className="w-4 h-4" />
+                            <span>Applied: {app.appliedDate}</span>
+                          </div>
+                        </div>
+                        {app.notes && (
+                          <p className="text-sm text-muted-foreground">{app.notes}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[app.status as keyof typeof statusColors]}`}>
+                          {app.status}
+                        </div>
+                        <Button
+                          onClick={() => handleEditClick(app)}
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={() => handleDeleteApplication(app.id)}
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0 text-red-400 hover:text-red-300"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </Card>
             ))}

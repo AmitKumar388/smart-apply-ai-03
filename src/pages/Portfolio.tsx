@@ -284,9 +284,8 @@ export const Portfolio = () => {
             </div>
 
             <Tabs defaultValue="preview" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-1">
                 <TabsTrigger value="preview">Preview</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
               </TabsList>
 
               <TabsContent value="preview" className="space-y-8 mt-6">
@@ -463,47 +462,6 @@ export const Portfolio = () => {
                     </div>
                   </div>
                 </Card>
-              </TabsContent>
-
-              <TabsContent value="analytics" className="space-y-6 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Profile Views</p>
-                        <p className="text-2xl font-bold text-foreground">1,234</p>
-                      </div>
-                      <BarChart3 className="w-8 h-8 text-primary" />
-                    </div>
-                  </Card>
-                  <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Downloads</p>
-                        <p className="text-2xl font-bold text-foreground">56</p>
-                      </div>
-                      <Download className="w-8 h-8 text-primary" />
-                    </div>
-                  </Card>
-                  <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Shares</p>
-                        <p className="text-2xl font-bold text-foreground">23</p>
-                      </div>
-                      <Share2 className="w-8 h-8 text-primary" />
-                    </div>
-                  </Card>
-                  <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Contact Clicks</p>
-                        <p className="text-2xl font-bold text-foreground">89</p>
-                      </div>
-                      <Mail className="w-8 h-8 text-primary" />
-                    </div>
-                  </Card>
-                </div>
               </TabsContent>
             </Tabs>
           </div>

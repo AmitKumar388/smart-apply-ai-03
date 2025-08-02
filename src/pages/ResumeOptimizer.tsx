@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { optimizeResume } from '@/lib/gemini';
-import { Upload, FileText, Zap, AlertCircle, Copy, Check, Star, Sparkles } from 'lucide-react';
+import { Upload, FileText, Zap, AlertCircle, Copy, Check, Star, Sparkles, X } from 'lucide-react';
 
 interface ResumeOptimization {
   id: string;

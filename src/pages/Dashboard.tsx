@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,9 @@ import {
   BarChart3, 
   User,
   TrendingUp,
-  Clock
+  Clock,
+  EyeOff,
+  Eye
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
@@ -53,6 +55,8 @@ const quickActions = [
 export const Dashboard = () => {
   const stats = useDashboardStats();
   const { activities, loading: activitiesLoading } = useRecentActivity();
+  const [showAllActivities, setShowAllActivities] = useState(false);
+  const [hideActivities, setHideActivities] = useState(false);
 
   const statCards = [
     { 
@@ -137,11 +141,36 @@ export const Dashboard = () => {
         {/* Recent Activity */}
         <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
           <div className="p-6">
-            <div className="flex items-center space-x-2 mb-6">
-              <Clock className="w-5 h-5 text-muted-foreground" />
-              <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-2">
+                <Clock className="w-5 h-5 text-muted-foreground" />
+                <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  onClick={() => setHideActivities(!hideActivities)}
+                  variant="outline"
+                  size="sm"
+                  className="border-border/50"
+                >
+                  {hideActivities ? <Eye className="w-4 h-4 mr-2" /> : <EyeOff className="w-4 h-4 mr-2" />}
+                  {hideActivities ? 'Show' : 'Hide'}
+                </Button>
+                <Button
+                  onClick={() => setShowAllActivities(!showAllActivities)}
+                  variant="outline"
+                  size="sm"
+                  className="border-border/50"
+                >
+                  {showAllActivities ? 'Show Less' : 'See All'}
+                </Button>
+              </div>
             </div>
-            {activitiesLoading ? (
+            {hideActivities ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Recent activity is hidden. Click "Show" to view your activity.</p>
+              </div>
+            ) : activitiesLoading ? (
               <div className="text-center py-12">
                 <p className="text-muted-foreground">Loading recent activity...</p>
               </div>
@@ -151,7 +180,7 @@ export const Dashboard = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {activities.map((activity) => {
+                {(showAllActivities ? activities : activities.slice(0, 5)).map((activity) => {
                   const IconComponent = activity.icon === 'FileText' ? FileText : 
                                       activity.icon === 'MessageSquare' ? MessageSquare : BarChart3;
                   return (
