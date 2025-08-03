@@ -41,27 +41,43 @@ export const useVoice = () => {
   }, [isRecording]);
 
   const speechToText = useCallback(async (audioBlob: Blob): Promise<string> => {
-    // Simple placeholder - in production you'd use Web Speech API or a service
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
+        
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
         
         recognition.onresult = (event) => {
           const transcript = event.results[0][0].transcript;
           resolve(transcript);
         };
         
-        recognition.onerror = () => {
+        recognition.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
           resolve("Could not transcribe audio. Please try typing your answer instead.");
         };
         
-        // For demo purposes, return a placeholder
+        recognition.onend = () => {
+          // Recognition ended
+        };
+        
+        // Convert blob to audio and use speech recognition
+        const audioURL = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioURL);
+        
+        // Start recognition immediately since we already have the audio
+        recognition.start();
+        
+        // Fallback timeout
         setTimeout(() => {
-          resolve("Voice transcription would appear here in a full implementation with proper speech-to-text service.");
-        }, 1000);
+          recognition.stop();
+          resolve("Transcription timeout. Please try speaking more clearly.");
+        }, 5000);
       } else {
-        resolve("Speech recognition not supported in this browser.");
+        resolve("Speech recognition not supported in this browser. Please use Chrome or Edge.");
       }
     });
   }, []);

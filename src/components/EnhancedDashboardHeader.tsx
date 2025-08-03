@@ -97,7 +97,11 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
                     </div>
                   </div>
                 </div>
+                
                 <div className="p-2">
+                  <div className="mb-2">
+                    <p className="text-xs font-medium text-muted-foreground px-2 py-1">SETTINGS</p>
+                  </div>
                   <Button 
                     variant="ghost" 
                     size="sm" 
