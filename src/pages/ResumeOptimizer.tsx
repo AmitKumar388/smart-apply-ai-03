@@ -217,7 +217,7 @@ Best regards,
                 Upload your resume file (PDF or DOCX) for AI optimization
                </p>
                
-               <div className="border-2 border-dashed border-border/50 rounded-lg p-6 text-center"
+               <div className="border-2 border-dashed border-border/50 rounded-lg p-6 text-center">
                  <input
                    ref={fileInputRef}
                    type="file"
