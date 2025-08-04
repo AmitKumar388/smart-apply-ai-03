@@ -79,7 +79,6 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
                   {user?.email?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
-              <span className="text-sm hidden sm:block">{user?.email?.split('@')[0] || 'User'}</span>
             </Button>
 
             {showUserMenu && (
