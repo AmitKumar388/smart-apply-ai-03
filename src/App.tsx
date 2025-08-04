@@ -14,6 +14,8 @@ import ApplicationTracker from "./pages/ApplicationTracker";
 import Portfolio from "./pages/Portfolio";
 import Profile from "./pages/Profile";
 import NotificationSettings from "./pages/NotificationSettings";
+import ProfileSettings from "./pages/ProfileSettings";
+import Preferences from "./pages/Preferences";
 import Privacy from "./pages/Privacy";
 import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
@@ -64,6 +66,16 @@ const App = () => (
             <Route path="/dashboard/notifications" element={
               <DashboardLayout>
                 <NotificationSettings />
+              </DashboardLayout>
+            } />
+            <Route path="/dashboard/profile-settings" element={
+              <DashboardLayout>
+                <ProfileSettings />
+              </DashboardLayout>
+            } />
+            <Route path="/dashboard/preferences" element={
+              <DashboardLayout>
+                <Preferences />
               </DashboardLayout>
             } />
             <Route path="/dashboard/privacy" element={

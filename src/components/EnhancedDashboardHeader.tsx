@@ -93,7 +93,6 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-foreground">{user?.email?.split('@')[0] || 'User'}</p>
-                      <p className="text-xs text-muted-foreground">{user?.email}</p>
                     </div>
                   </div>
                 </div>
@@ -107,12 +106,24 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
                     size="sm" 
                     className="w-full justify-start text-sm"
                     onClick={() => {
-                      navigate('/dashboard/profile');
+                      navigate('/dashboard/profile-settings');
                       setShowUserMenu(false);
                     }}
                   >
                     <User className="w-4 h-4 mr-2" />
-                    Profile
+                    Profile Settings
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-sm"
+                    onClick={() => {
+                      navigate('/dashboard/preferences');
+                      setShowUserMenu(false);
+                    }}
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Preferences
                   </Button>
                   <Button 
                     variant="ghost" 
@@ -125,30 +136,6 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
                   >
                     <Bell className="w-4 h-4 mr-2" />
                     Notifications
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-full justify-start text-sm"
-                    onClick={() => {
-                      navigate('/dashboard/privacy');
-                      setShowUserMenu(false);
-                    }}
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Privacy & Security
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-full justify-start text-sm"
-                    onClick={() => {
-                      navigate('/dashboard/account');
-                      setShowUserMenu(false);
-                    }}
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Account Settings
                   </Button>
                   <div className="border-t border-border/50 my-2" />
                   <Button 

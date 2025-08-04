@@ -133,17 +133,18 @@ I look forward to the opportunity to discuss how my background aligns with your 
 Best regards,
 [Your Name]`,
         match_score: result.matchScore,
-        matched_keywords: result.keywords,
-        tips: [
-          "Use action verbs to start bullet points",
-          "Quantify achievements with numbers", 
-          "Tailor keywords to match job description",
-          "Keep formatting consistent and clean",
-          "Highlight relevant technical skills"
-        ]
+        matched_keywords: result.keywords
       };
       
-      // Add local highlights for display only (not saved to database)
+      // Add local data for display only (not saved to database)
+      const localTips = [
+        "Use action verbs to start bullet points",
+        "Quantify achievements with numbers", 
+        "Tailor keywords to match job description",
+        "Keep formatting consistent and clean",
+        "Highlight relevant technical skills"
+      ];
+      
       const localHighlights = [
         "Strong technical background matches job requirements",
         "Experience level aligns with position expectations", 
@@ -159,9 +160,9 @@ Best regards,
 
       if (error) throw error;
 
-      // Add highlights to the data for display
-      const optimizationWithHighlights = { ...data, highlights: localHighlights };
-      setOptimization(optimizationWithHighlights);
+      // Add highlights and tips to the data for display
+      const optimizationWithExtras = { ...data, highlights: localHighlights, tips: localTips };
+      setOptimization(optimizationWithExtras);
       toast({
         title: "Resume optimized!",
         description: `Match score: ${result.matchScore}%. Your resume has been optimized with Gemini AI!`,
@@ -216,7 +217,7 @@ Best regards,
                 Upload your resume file (PDF or DOCX) for AI optimization
                </p>
                
-               <div className="border-2 border-dashed border-border/50 rounded-lg p-8 text-center">
+               <div className="border-2 border-dashed border-border/50 rounded-lg p-6 text-center"
                  <input
                    ref={fileInputRef}
                    type="file"
