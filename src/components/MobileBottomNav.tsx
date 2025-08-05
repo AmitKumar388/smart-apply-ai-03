@@ -14,7 +14,6 @@ const mobileNavigation = [
   { name: 'Resume', href: '/dashboard/resume-optimizer', icon: FileText },
   { name: 'Interview', href: '/dashboard/interview-practice', icon: MessageSquare },
   { name: 'Tracker', href: '/dashboard/application-tracker', icon: BarChart3 },
-  { name: 'Portfolio', href: '/dashboard/portfolio', icon: User },
 ];
 
 export const MobileBottomNav = () => {

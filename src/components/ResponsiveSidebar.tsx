@@ -20,7 +20,6 @@ const navigation = [
   { name: 'Resume Optimizer', href: '/dashboard/resume-optimizer', icon: FileText, description: 'AI-powered resume tailoring' },
   { name: 'Interview Practice', href: '/dashboard/interview-practice', icon: MessageSquare, description: 'STAR method practice' },
   { name: 'Application Tracker', href: '/dashboard/application-tracker', icon: BarChart3, description: 'Track your applications' },
-  { name: 'Portfolio', href: '/dashboard/portfolio', icon: User, description: 'Auto-generated portfolio' },
 ];
 
 interface ResponsiveSidebarProps {

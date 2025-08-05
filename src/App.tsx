@@ -53,11 +53,6 @@ const App = () => (
                 <ApplicationTracker />
               </DashboardLayout>
             } />
-            <Route path="/dashboard/portfolio" element={
-              <DashboardLayout>
-                <Portfolio />
-              </DashboardLayout>
-            } />
             <Route path="/dashboard/profile" element={
               <DashboardLayout>
                 <Profile />

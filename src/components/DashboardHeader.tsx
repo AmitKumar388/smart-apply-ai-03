@@ -81,9 +81,11 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
                   ))}
                 </div>
                 <div className="p-3 border-t border-border/50">
+                <Link to="/dashboard/notifications"> 
                   <Button variant="ghost" size="sm" className="w-full text-sm text-muted-foreground">
                     View all notifications
                   </Button>
+                </Link>
                 </div>
               </div>
             )}
@@ -97,7 +99,6 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
               onClick={() => setShowUserMenu(!showUserMenu)}
             >
               <User className="w-5 h-5" />
-              <span className="ml-2 text-sm hidden sm:block">{user?.email?.split('@')[0] || 'User'}</span>
             </Button>
 
             {showUserMenu && (
@@ -107,16 +108,18 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                 </div>
                 <div className="p-2"> 
-                  <Link to="/account">
+                  <Link to="/dashboard/profile-settings">
                   <Button variant="ghost" size="sm" className="w-full justify-start text-sm">
                     <User className="w-4 h-4 mr-2" />
                     Profile Settings
                   </Button>
                   </Link>
+                  <Link to="/dashboard/preferences">
                   <Button variant="ghost" size="sm" className="w-full justify-start text-sm">
                     <Settings className="w-4 h-4 mr-2" />
                     Preferences
                   </Button>
+                  </Link>
                   <div className="border-t border-border/50 my-2" />
                   <Button 
                     variant="ghost" 
