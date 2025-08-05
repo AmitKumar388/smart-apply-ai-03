@@ -5,6 +5,8 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Textarea } from '../components/ui/textarea';
+import { Label } from '../components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { useToast } from '../hooks/use-toast';
 import { useAuth } from '../hooks/useAuth';
 import { useVoice } from '../hooks/useVoice';
@@ -26,7 +28,9 @@ import {
   EyeOff,
   Sparkles,
   Target,
-  BookOpen
+  BookOpen,
+  Edit2,
+  Loader2
 } from 'lucide-react';
 
 interface InterviewQuestion {
@@ -60,6 +64,9 @@ export const InterviewPractice = () => {
   const [isGeneratingAnswer, setIsGeneratingAnswer] = useState(false);
   const [savedAnswers, setSavedAnswers] = useState<SavedAnswer[]>([]);
   const [showSavedAnswers, setShowSavedAnswers] = useState(false);
+  const [editingAnswer, setEditingAnswer] = useState<SavedAnswer | null>(null);
+  const [editedAnswer, setEditedAnswer] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
   const voice = useVoice();
@@ -69,6 +76,12 @@ export const InterviewPractice = () => {
       fetchSavedAnswers();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (editingAnswer) {
+      setEditedAnswer(editingAnswer.userAnswer || '');
+    }
+  }, [editingAnswer]);
 
   const fetchSavedAnswers = async () => {
     if (!user) return;
@@ -255,6 +268,38 @@ export const InterviewPractice = () => {
     }
   };
 
+  const handleUpdateAnswer = async () => {
+    if (!editedAnswer.trim() || !editingAnswer) return;
+
+    setIsLoading(true);
+    try {
+      const { error } = await supabase
+        .from('interview_questions')
+        .update({ user_answer: editedAnswer.trim() })
+        .eq('id', editingAnswer.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Answer updated",
+        description: "Your answer has been updated successfully.",
+      });
+
+      await fetchSavedAnswers();
+      setEditingAnswer(null);
+      setEditedAnswer('');
+    } catch (error) {
+      console.error('Error updating answer:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update answer. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (step === 'setup') {
     return (
       <div>
@@ -389,14 +434,24 @@ export const InterviewPractice = () => {
                       <h3 className="text-sm font-semibold text-foreground leading-tight">
                         {answer.question}
                       </h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => deleteSavedAnswer(answer.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingAnswer(answer)}
+                          className="text-primary hover:text-primary"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteSavedAnswer(answer.id)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
                     
                     {showSavedAnswers && (
@@ -442,7 +497,46 @@ export const InterviewPractice = () => {
                 </Card>
               )}
 
-              {/* Edit Answer Modal would go here */}
+              {/* Edit Answer Modal */}
+              <Dialog open={!!editingAnswer} onOpenChange={() => setEditingAnswer(null)}>
+                <DialogContent className="max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Edit Your Answer</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">Question:</Label>
+                      <p className="text-sm text-muted-foreground mt-1">{editingAnswer?.question}</p>
+                    </div>
+                    <div>
+                      <Label htmlFor="editAnswer">Your Answer:</Label>
+                      <Textarea
+                        id="editAnswer"
+                        value={editedAnswer}
+                        onChange={(e) => setEditedAnswer(e.target.value)}
+                        placeholder="Edit your answer..."
+                        className="min-h-[120px] mt-2"
+                      />
+                    </div>
+                    {editingAnswer?.aiSuggestion && (
+                      <div className="bg-primary/10 p-3 rounded border border-primary/20">
+                        <Label className="text-sm font-medium">AI Suggestion:</Label>
+                        <p className="text-sm mt-1">{editingAnswer.aiSuggestion}</p>
+                      </div>
+                    )}
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" onClick={() => setEditingAnswer(null)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleUpdateAnswer} disabled={isLoading}>
+                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                        Update Answer
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
               <div className="mt-6 p-4 bg-muted/30 rounded-lg">
                 <p className="text-sm text-muted-foreground text-center">
                   💡 Review your answers and identify areas for improvement based on AI suggestions
