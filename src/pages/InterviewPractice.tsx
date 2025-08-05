@@ -441,6 +441,13 @@ export const InterviewPractice = () => {
                   </div>
                 </Card>
               )}
+
+              {/* Edit Answer Modal would go here */}
+              <div className="mt-6 p-4 bg-muted/30 rounded-lg">
+                <p className="text-sm text-muted-foreground text-center">
+                  💡 Review your answers and identify areas for improvement based on AI suggestions
+                </p>
+              </div>
             </div>
           </div>
         </div>

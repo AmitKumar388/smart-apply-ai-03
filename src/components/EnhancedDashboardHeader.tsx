@@ -129,12 +129,12 @@ export const DashboardHeader = ({ title, subtitle }: DashboardHeaderProps) => {
                     size="sm" 
                     className="w-full justify-start text-sm"
                     onClick={() => {
-                      navigate('/dashboard/notifications');
+                      navigate('/dashboard/settings');
                       setShowUserMenu(false);
                     }}
                   >
-                    <Bell className="w-4 h-4 mr-2" />
-                    Notifications
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
                   </Button>
                   <div className="border-t border-border/50 my-2" />
                   <Button 

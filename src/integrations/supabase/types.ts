@@ -16,30 +16,36 @@ export type Database = {
     Tables: {
       interview_questions: {
         Row: {
+          ai_suggestion: string | null
           company_name: string | null
           created_at: string
           id: string
           job_title: string
           question: string
           star_answer: string | null
+          user_answer: string | null
           user_id: string
         }
         Insert: {
+          ai_suggestion?: string | null
           company_name?: string | null
           created_at?: string
           id?: string
           job_title: string
           question: string
           star_answer?: string | null
+          user_answer?: string | null
           user_id: string
         }
         Update: {
+          ai_suggestion?: string | null
           company_name?: string | null
           created_at?: string
           id?: string
           job_title?: string
           question?: string
           star_answer?: string | null
+          user_answer?: string | null
           user_id?: string
         }
         Relationships: []
