@@ -1,161 +1,160 @@
-import React, { useState } from 'react';
-import { DashboardHeader } from '@/components/DashboardHeader';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { User, Mail, Phone, MapPin, Camera } from 'lucide-react';
+import React from 'react';
+import { DashboardHeader } from '../components/DashboardHeader';
+import { Card } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Switch } from '../components/ui/switch';
+import { Label } from '../components/ui/label';
+import { Separator } from '../components/ui/separator';
+import { useToast } from '../hooks/use-toast';
+import { Settings, Bell, Shield, Eye, Trash2 } from 'lucide-react';
 
 export const ProfileSettings = () => {
-  const { user } = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const [profile, setProfile] = useState({
-    fullName: user?.user_metadata?.full_name || '',
-    email: user?.email || '',
-    phone: '',
-    location: '',
-    bio: '',
-    avatar: user?.user_metadata?.avatar_url || ''
-  });
 
-  const handleSave = async () => {
-    setIsLoading(true);
-    try {
-      // Here you would update the user profile
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSaveSettings = () => {
+    toast({
+      title: "Settings saved",
+      description: "Your profile settings have been updated successfully.",
+    });
   };
 
   return (
     <div>
       <DashboardHeader 
         title="Profile Settings" 
-        subtitle="Manage your personal information and preferences"
+        subtitle="Manage your account preferences and privacy settings"
       />
       
-      <div className="p-8 max-w-4xl mx-auto">
-        <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
-          <div className="p-6">
-            {/* Avatar Section */}
-            <div className="flex items-center space-x-6 mb-8">
-              <div className="relative">
-                <Avatar className="w-24 h-24">
-                  <AvatarImage src={profile.avatar} />
-                  <AvatarFallback className="text-2xl">
-                    {profile.fullName?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
-                >
-                  <Camera className="w-4 h-4" />
-                </Button>
+      <div className="p-4 lg:p-8">
+        <div className="max-w-4xl space-y-6">
+          {/* Notification Settings */}
+          <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
+            <div className="p-4 lg:p-6">
+              <div className="flex items-center space-x-2 mb-6">
+                <Bell className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold text-foreground">Notification Settings</h3>
               </div>
-              <div>
-                <h3 className="text-xl font-semibold text-foreground">Profile Photo</h3>
-                <p className="text-sm text-muted-foreground">
-                  Update your profile photo to personalize your account
-                </p>
-              </div>
-            </div>
-
-            {/* Form Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="fullName" className="flex items-center space-x-2">
-                  <User className="w-4 h-4" />
-                  <span>Full Name</span>
-                </Label>
-                <Input
-                  id="fullName"
-                  value={profile.fullName}
-                  onChange={(e) => setProfile(prev => ({ ...prev, fullName: e.target.value }))}
-                  placeholder="Enter your full name"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4" />
-                  <span>Email</span>
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={profile.email}
-                  onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="Enter your email"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4" />
-                  <span>Phone</span>
-                </Label>
-                <Input
-                  id="phone"
-                  value={profile.phone}
-                  onChange={(e) => setProfile(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="Enter your phone number"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="location" className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>Location</span>
-                </Label>
-                <Input
-                  id="location"
-                  value={profile.location}
-                  onChange={(e) => setProfile(prev => ({ ...prev, location: e.target.value }))}
-                  placeholder="Enter your location"
-                />
+              
+              <div className="space-y-4 lg:space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5 flex-1 pr-4">
+                    <Label className="text-sm lg:text-base">Email Notifications</Label>
+                    <p className="text-xs lg:text-sm text-muted-foreground">
+                      Receive notifications about new features and updates
+                    </p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                
+                <Separator />
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5 flex-1 pr-4">
+                    <Label className="text-sm lg:text-base">Interview Reminders</Label>
+                    <p className="text-xs lg:text-sm text-muted-foreground">
+                      Get reminded about upcoming interview sessions
+                    </p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                
+                <Separator />
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5 flex-1 pr-4">
+                    <Label className="text-sm lg:text-base">Resume Optimization Alerts</Label>
+                    <p className="text-xs lg:text-sm text-muted-foreground">
+                      Notifications when optimization results are ready
+                    </p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
               </div>
             </div>
+          </Card>
 
-            <div className="mt-6 space-y-2">
-              <Label htmlFor="bio">Bio</Label>
-              <Textarea
-                id="bio"
-                value={profile.bio}
-                onChange={(e) => setProfile(prev => ({ ...prev, bio: e.target.value }))}
-                placeholder="Tell us about yourself..."
-                className="min-h-[100px]"
-              />
+          {/* Privacy Settings */}
+          <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
+            <div className="p-4 lg:p-6">
+              <div className="flex items-center space-x-2 mb-6">
+                <Shield className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold text-foreground">Privacy & Security</h3>
+              </div>
+              
+              <div className="space-y-4 lg:space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5 flex-1 pr-4">
+                    <Label className="text-sm lg:text-base">Profile Visibility</Label>
+                    <p className="text-xs lg:text-sm text-muted-foreground">
+                      Make your profile visible to recruiters
+                    </p>
+                  </div>
+                  <Switch />
+                </div>
+                
+                <Separator />
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5 flex-1 pr-4">
+                    <Label className="text-sm lg:text-base">Data Analytics</Label>
+                    <p className="text-xs lg:text-sm text-muted-foreground">
+                      Allow anonymous usage analytics to improve the service
+                    </p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
             </div>
+          </Card>
 
-            <div className="mt-8 flex justify-end">
-              <Button 
-                onClick={handleSave}
-                disabled={isLoading}
-                className="bg-gradient-primary hover:opacity-90 text-primary-foreground"
-              >
-                {isLoading ? 'Saving...' : 'Save Changes'}
-              </Button>
+          {/* Account Management */}
+          <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
+            <div className="p-4 lg:p-6">
+              <div className="flex items-center space-x-2 mb-6">
+                <Settings className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold text-foreground">Account Management</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="p-4 border border-border/50 rounded-lg">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h4 className="font-medium text-foreground text-sm lg:text-base">Export Data</h4>
+                      <p className="text-xs lg:text-sm text-muted-foreground">
+                        Download all your profile data and interview history
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
+                      Export
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h4 className="font-medium text-foreground text-sm lg:text-base">Delete Account</h4>
+                      <p className="text-xs lg:text-sm text-muted-foreground">
+                        Permanently delete your account and all associated data
+                      </p>
+                    </div>
+                    <Button variant="destructive" size="sm" className="w-full sm:w-auto">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
+          </Card>
+
+          {/* Save Button */}
+          <div className="flex justify-end pt-6">
+            <Button onClick={handleSaveSettings} className="bg-gradient-primary text-primary-foreground w-full sm:w-auto">
+              Save All Settings
+            </Button>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

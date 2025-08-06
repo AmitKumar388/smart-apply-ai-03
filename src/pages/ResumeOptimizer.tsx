@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { optimizeResume } from '@/lib/gemini';
-import { Upload, FileText, Zap, AlertCircle, Copy, Check, Star, Sparkles, X, Target, TrendingUp, Lightbulb } from 'lucide-react';
+import { Upload, FileText, Zap, AlertCircle, Copy, Check, Star, Sparkles, X, Target, TrendingUp, Lightbulb, History, Calendar, Eye } from 'lucide-react';
 
 interface ResumeOptimization {
   id: string;
@@ -29,10 +29,35 @@ export const ResumeOptimizer = () => {
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [isParsingFile, setIsParsingFile] = useState(false);
   const [optimization, setOptimization] = useState<ResumeOptimization | null>(null);
+  const [optimizations, setOptimizations] = useState<ResumeOptimization[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (user) {
+      fetchOptimizations();
+    }
+  }, [user]);
+
+  const fetchOptimizations = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('resume_optimizations')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setOptimizations(data || []);
+    } catch (error) {
+      console.error('Error fetching optimizations:', error);
+    }
+  };
 
   const extractTextFromPDF = async (file: File): Promise<string> => {
     try {
@@ -163,6 +188,10 @@ Best regards,
       // Add highlights and tips to the data for display
       const optimizationWithExtras = { ...data, highlights: localHighlights, tips: localTips };
       setOptimization(optimizationWithExtras);
+      
+      // Refresh optimizations list
+      fetchOptimizations();
+      
       toast({
         title: "Resume optimized!",
         description: `Match score: ${result.matchScore}%. Your resume has been optimized with Gemini AI!`,
@@ -204,8 +233,65 @@ Best regards,
         subtitle="Upload your resume and job description to get optimization suggestions"
       />
       
-      <div className="p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="p-4 lg:p-8 space-y-6">
+        {/* Header with History Toggle */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h2 className="text-xl font-semibold text-foreground">Resume Optimization</h2>
+          <div className="flex gap-2">
+            <Button
+              variant={showHistory ? "default" : "outline"}
+              onClick={() => setShowHistory(!showHistory)}
+              size="sm"
+            >
+              <History className="w-4 h-4 mr-2" />
+              {showHistory ? 'Hide History' : 'View History'}
+            </Button>
+          </div>
+        </div>
+
+        {/* History View */}
+        {showHistory && (
+          <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
+            <div className="p-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <History className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold text-foreground">Optimization History</h3>
+              </div>
+              {optimizations.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">No optimizations yet. Create your first optimization above!</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {optimizations.map((opt) => (
+                    <Card key={opt.id} className="bg-secondary/20 border-border/30 hover:border-primary/50 transition-colors cursor-pointer">
+                      <div className="p-4" onClick={() => setOptimization({ ...opt, highlights: [], tips: [] })}>
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {opt.match_score}% Match
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(opt.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-foreground line-clamp-2 mb-2">
+                          {opt.job_description.substring(0, 100)}...
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">
+                            {opt.matched_keywords?.length || 0} keywords
+                          </span>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
           {/* Upload Resume */}
           <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
             <div className="p-6">
@@ -217,7 +303,7 @@ Best regards,
                 Upload your resume file (PDF or DOCX) for AI optimization
                </p>
                
-               <div className="border-2 border-dashed border-border/50 rounded-lg p-6 text-center">
+               <div className="border-2 border-dashed border-border/50 rounded-lg p-4 lg:p-6 text-center">
                  <input
                    ref={fileInputRef}
                    type="file"
@@ -225,7 +311,7 @@ Best regards,
                    onChange={handleFileUpload}
                    className="hidden"
                  />
-                 <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                 <Upload className="w-8 h-8 lg:w-12 lg:h-12 text-muted-foreground mx-auto mb-4" />
                  <Button
                    variant="outline"
                    onClick={() => fileInputRef.current?.click()}
