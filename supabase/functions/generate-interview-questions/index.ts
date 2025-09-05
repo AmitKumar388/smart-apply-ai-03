@@ -15,12 +15,13 @@ serve(async (req) => {
   try {
     const { jobRole, companyName } = await req.json();
 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    // Get environment variables
+    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
 
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
+    if (!geminiApiKey) {
+      throw new Error('Google Gemini API key not configured');
     }
 
     // Get user from auth header
@@ -42,40 +43,32 @@ serve(async (req) => {
       throw new Error("User not authenticated");
     }
 
-    const prompt = `Generate interview questions for: ${jobRole}${companyName ? ` at ${companyName}` : ""}`;
+    const prompt = `You are an expert interview coach. Generate 5 challenging but realistic interview questions for a ${jobRole} position${companyName ? ` at ${companyName}` : ""}. Each question should be structured to allow for STAR method responses (Situation, Task, Action, Result). Return the questions as a JSON array of objects with 'question' and 'category' fields. Categories should be: 'behavioral', 'technical', 'situational', or 'leadership'.`;
 
-    const openAiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${openAIApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4.1-2025-04-14",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are an expert interview coach. Generate 5 challenging but realistic interview questions for the given job role/company. Each question should be structured to allow for STAR method responses (Situation, Task, Action, Result). Return the questions as a JSON array of objects with 'question' and 'category' fields. Categories should be: 'behavioral', 'technical', 'situational', or 'leadership'.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        temperature: 0.7,
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
       }),
     });
 
-    if (!openAiRes.ok) {
-      throw new Error(`OpenAI API Error: ${openAiRes.statusText}`);
+    if (!geminiRes.ok) {
+      throw new Error(`Google Gemini API Error: ${geminiRes.statusText}`);
     }
 
-    const aiData = await openAiRes.json();
+    const aiData = await geminiRes.json();
     let questions;
 
     try {
-      questions = JSON.parse(aiData.choices[0].message.content);
+      const content = aiData.candidates[0].content.parts[0].text;
+      questions = JSON.parse(content);
     } catch (_) {
       // Fallback questions if JSON parsing fails
       questions = [
