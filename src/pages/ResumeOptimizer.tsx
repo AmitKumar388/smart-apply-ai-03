@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { optimizeResume } from '@/lib/gemini';
-import { Upload, FileText, Zap, AlertCircle, Copy, Check, Star, Sparkles, X, Target, TrendingUp, Lightbulb, History, Calendar, Eye } from 'lucide-react';
+import { Upload, FileText, Zap, AlertCircle, Copy, Check, Star, Sparkles, X, Target, TrendingUp, Lightbulb, History, Calendar, Eye, Download, Trash2, Archive } from 'lucide-react';
 
 interface ResumeOptimization {
   id: string;
@@ -30,7 +31,11 @@ export const ResumeOptimizer = () => {
   const [isParsingFile, setIsParsingFile] = useState(false);
   const [optimization, setOptimization] = useState<ResumeOptimization | null>(null);
   const [optimizations, setOptimizations] = useState<ResumeOptimization[]>([]);
+  const [resumes, setResumes] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [showResumeHistory, setShowResumeHistory] = useState(false);
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<any>(null);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -39,6 +44,7 @@ export const ResumeOptimizer = () => {
   useEffect(() => {
     if (user) {
       fetchOptimizations();
+      fetchResumes();
     }
   }, [user]);
 
@@ -56,6 +62,79 @@ export const ResumeOptimizer = () => {
       setOptimizations(data || []);
     } catch (error) {
       console.error('Error fetching optimizations:', error);
+    }
+  };
+
+  const fetchResumes = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('resumes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setResumes(data || []);
+    } catch (error) {
+      console.error('Error fetching resumes:', error);
+    }
+  };
+
+  const viewOptimizationDetails = (optimization: any) => {
+    setSelectedHistoryItem(optimization);
+    setShowDetailDialog(true);
+  };
+
+  const viewResumeDetails = (resume: any) => {
+    setSelectedHistoryItem(resume);
+    setShowDetailDialog(true);
+  };
+
+  const deleteOptimization = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('resume_optimizations')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      fetchOptimizations();
+      toast({
+        title: "Deleted",
+        description: "Optimization deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete optimization.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteResume = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('resumes')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      fetchResumes();
+      toast({
+        title: "Deleted",
+        description: "Resume deleted successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete resume.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -105,6 +184,29 @@ export const ResumeOptimizer = () => {
           }
           
           setResumeContent(extractedText);
+          
+          // Save resume to database
+          if (user) {
+            const resumeData = {
+              user_id: user.id,
+              title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+              content: extractedText,
+              file_type: file.type === 'application/pdf' ? 'pdf' : 'docx'
+            };
+            
+            try {
+              const { error } = await supabase
+                .from('resumes')
+                .insert(resumeData);
+
+              if (!error) {
+                fetchResumes(); // Refresh resume list
+              }
+            } catch (error) {
+              console.error('Error saving resume:', error);
+            }
+          }
+          
           toast({
             title: "File processed",
             description: `${file.name} has been parsed and is ready for optimization.`,
@@ -244,12 +346,20 @@ Best regards,
               size="sm"
             >
               <History className="w-4 h-4 mr-2" />
-              {showHistory ? 'Hide History' : 'View History'}
+              {showHistory ? 'Hide Optimization History' : 'View Optimization History'}
+            </Button>
+            <Button
+              variant={showResumeHistory ? "default" : "outline"}
+              onClick={() => setShowResumeHistory(!showResumeHistory)}
+              size="sm"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              {showResumeHistory ? 'Hide Resume History' : 'View Resume History'}
             </Button>
           </div>
         </div>
 
-        {/* History View */}
+        {/* Optimization History */}
         {showHistory && (
           <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
             <div className="p-6">
@@ -262,8 +372,8 @@ Best regards,
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {optimizations.map((opt) => (
-                    <Card key={opt.id} className="bg-secondary/20 border-border/30 hover:border-primary/50 transition-colors cursor-pointer">
-                      <div className="p-4" onClick={() => setOptimization({ ...opt, highlights: [], tips: [] })}>
+                    <Card key={opt.id} className="bg-secondary/20 border-border/30 hover:border-primary/50 transition-colors">
+                      <div className="p-4">
                         <div className="flex items-center justify-between mb-2">
                           <Badge variant="secondary" className="text-xs">
                             {opt.match_score}% Match
@@ -272,15 +382,106 @@ Best regards,
                             {new Date(opt.created_at).toLocaleDateString()}
                           </span>
                         </div>
-                        <p className="text-sm text-foreground line-clamp-2 mb-2">
+                        <p className="text-sm text-foreground line-clamp-2 mb-3">
                           {opt.job_description.substring(0, 100)}...
                         </p>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mb-2">
                           <span className="text-xs text-muted-foreground">
                             {opt.matched_keywords?.length || 0} keywords
                           </span>
-                          <Button variant="ghost" size="sm">
-                            <Eye className="w-3 h-3" />
+                        </div>
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => viewOptimizationDetails(opt)}
+                            className="flex-1"
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            View
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => setOptimization({ ...opt, highlights: [], tips: [] })}
+                            className="flex-1"
+                          >
+                            <Target className="w-3 h-3 mr-1" />
+                            Use
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => deleteOptimization(opt.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
+        {/* Resume History */}
+        {showResumeHistory && (
+          <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
+            <div className="p-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <FileText className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-semibold text-foreground">Resume History</h3>
+              </div>
+              {resumes.length === 0 ? (
+                <p className="text-muted-foreground text-center py-8">No resumes uploaded yet. Upload your first resume above!</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {resumes.map((resume) => (
+                    <Card key={resume.id} className="bg-secondary/20 border-border/30 hover:border-primary/50 transition-colors">
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge variant="outline" className="text-xs">
+                            {resume.file_type?.toUpperCase() || 'PDF'}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(resume.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-medium text-foreground mb-2 line-clamp-1">
+                          {resume.title}
+                        </h4>
+                        <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                          {resume.content?.substring(0, 80)}...
+                        </p>
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => viewResumeDetails(resume)}
+                            className="flex-1"
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            View
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => setResumeContent(resume.content || '')}
+                            className="flex-1"
+                          >
+                            <Upload className="w-3 h-3 mr-1" />
+                            Use
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => deleteResume(resume.id)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-3 h-3" />
                           </Button>
                         </div>
                       </div>
@@ -527,6 +728,197 @@ Best regards,
             </div>
           </div>
         )}
+
+        {/* Detail Dialog */}
+        <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedHistoryItem?.optimized_resume ? 'Optimization Details' : 'Resume Details'}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {selectedHistoryItem && (
+              <div className="space-y-6">
+                {/* Header Info */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">Created</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(selectedHistoryItem.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  {selectedHistoryItem.match_score && (
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-foreground">Match Score</p>
+                      <Badge variant="secondary">{selectedHistoryItem.match_score}%</Badge>
+                    </div>
+                  )}
+                  {selectedHistoryItem.matched_keywords && (
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-foreground">Keywords Found</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedHistoryItem.matched_keywords.length} keywords
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* For Optimizations */}
+                {selectedHistoryItem.optimized_resume && (
+                  <>
+                    {/* Job Description */}
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">Job Description</h4>
+                      <Card className="bg-secondary/20 border-border/30">
+                        <div className="p-4">
+                          <p className="text-sm text-foreground whitespace-pre-wrap">
+                            {selectedHistoryItem.job_description}
+                          </p>
+                        </div>
+                      </Card>
+                    </div>
+
+                    {/* Optimized Resume */}
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-lg font-medium text-foreground">Optimized Resume</h4>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => copyToClipboard(selectedHistoryItem.optimized_resume, 'optimized')}
+                        >
+                          {copiedField === 'optimized' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                          Copy
+                        </Button>
+                      </div>
+                      <Card className="bg-secondary/20 border-border/30">
+                        <div className="p-4">
+                          <p className="text-sm text-foreground whitespace-pre-wrap">
+                            {selectedHistoryItem.optimized_resume}
+                          </p>
+                        </div>
+                      </Card>
+                    </div>
+
+                    {/* Cover Letter */}
+                    {selectedHistoryItem.cover_letter && (
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-lg font-medium text-foreground">Cover Letter</h4>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => copyToClipboard(selectedHistoryItem.cover_letter, 'cover')}
+                          >
+                            {copiedField === 'cover' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                            Copy
+                          </Button>
+                        </div>
+                        <Card className="bg-secondary/20 border-border/30">
+                          <div className="p-4">
+                            <p className="text-sm text-foreground whitespace-pre-wrap">
+                              {selectedHistoryItem.cover_letter}
+                            </p>
+                          </div>
+                        </Card>
+                      </div>
+                    )}
+
+                    {/* Keywords */}
+                    {selectedHistoryItem.matched_keywords && selectedHistoryItem.matched_keywords.length > 0 && (
+                      <div>
+                        <h4 className="text-lg font-medium text-foreground mb-3">Matched Keywords</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedHistoryItem.matched_keywords.map((keyword: string, index: number) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {keyword}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* For Resumes */}
+                {!selectedHistoryItem.optimized_resume && selectedHistoryItem.content && (
+                  <>
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">Resume Title</h4>
+                      <p className="text-foreground">{selectedHistoryItem.title}</p>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-lg font-medium text-foreground">Resume Content</h4>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => copyToClipboard(selectedHistoryItem.content, 'resume')}
+                          >
+                            {copiedField === 'resume' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                            Copy
+                          </Button>
+                          {selectedHistoryItem.file_url && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(selectedHistoryItem.file_url, '_blank')}
+                            >
+                              <Download className="w-4 h-4" />
+                              Download
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      <Card className="bg-secondary/20 border-border/30">
+                        <div className="p-4">
+                          <p className="text-sm text-foreground whitespace-pre-wrap">
+                            {selectedHistoryItem.content}
+                          </p>
+                        </div>
+                      </Card>
+                    </div>
+                  </>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 pt-4 border-t border-border/20">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (selectedHistoryItem.optimized_resume) {
+                        setOptimization({ ...selectedHistoryItem, highlights: [], tips: [] });
+                      } else {
+                        setResumeContent(selectedHistoryItem.content || '');
+                      }
+                      setShowDetailDialog(false);
+                    }}
+                  >
+                    <Target className="w-4 h-4 mr-2" />
+                    Use This {selectedHistoryItem.optimized_resume ? 'Optimization' : 'Resume'}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      if (selectedHistoryItem.optimized_resume) {
+                        deleteOptimization(selectedHistoryItem.id);
+                      } else {
+                        deleteResume(selectedHistoryItem.id);
+                      }
+                      setShowDetailDialog(false);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
