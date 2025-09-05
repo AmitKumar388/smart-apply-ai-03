@@ -1,101 +1,72 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function safeExtractText(apiData: any): string {
+  try {
+    return apiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  } catch {
+    return "";
+  }
+}
+
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     const { jobRole, companyName } = await req.json();
+    const geminiApiKey = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+    if (!geminiApiKey) throw new Error("Gemini API key missing");
 
-    // Get environment variables
-    const geminiApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) throw new Error("No authorization header");
 
-    if (!geminiApiKey) {
-      throw new Error('Google Gemini API key not configured');
-    }
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
 
-    // Get user from auth header
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader) {
-      throw new Error('No authorization header');
-    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
 
-    const supabase = createClient(supabaseUrl!, supabaseKey!, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    const prompt = `Generate 5 interview questions for a ${jobRole} ${companyName ? `at ${companyName}` : ""}. 
+    Return JSON array with objects {question, category}. Categories: behavioral, technical, situational, leadership.`;
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const aiRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+      }
+    );
 
-    if (authError || !user) {
-      throw new Error("User not authenticated");
-    }
-
-    const prompt = `You are an expert interview coach. Generate 5 challenging but realistic interview questions for a ${jobRole} position${companyName ? ` at ${companyName}` : ""}. Each question should be structured to allow for STAR method responses (Situation, Task, Action, Result). Return the questions as a JSON array of objects with 'question' and 'category' fields. Categories should be: 'behavioral', 'technical', 'situational', or 'leadership'.`;
-
-    const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }]
-      }),
-    });
-
-    if (!geminiRes.ok) {
-      throw new Error(`Google Gemini API Error: ${geminiRes.statusText}`);
-    }
-
-    const aiData = await geminiRes.json();
+    const aiData = await aiRes.json();
     let questions;
-
     try {
-      const content = aiData.candidates[0].content.parts[0].text;
-      questions = JSON.parse(content);
-    } catch (_) {
-      // Fallback questions if JSON parsing fails
+      const text = safeExtractText(aiData);
+      const cleaned = text.replace(/```json|```/g, "").trim();
+      questions = JSON.parse(cleaned);
+    } catch {
       questions = [
-        {
-          question: "Tell me about a time you faced a significant challenge and how you overcame it.",
-          category: "behavioral",
-        },
-        {
-          question: "Describe a situation with a difficult team member. What did you do?",
-          category: "behavioral",
-        },
-        {
-          question: "Explain a time you had to learn a new technology quickly.",
-          category: "technical",
-        },
-        {
-          question: "Describe a project you led. What was your strategy?",
-          category: "leadership",
-        },
-        {
-          question: "Tell me about a decision you made with incomplete information.",
-          category: "situational",
-        },
+        { question: "Tell me about a time you solved a difficult problem.", category: "behavioral" },
+        { question: "Describe a challenging technical issue you faced.", category: "technical" },
+        { question: "Explain a decision you made under pressure.", category: "situational" },
+        { question: "Describe a project you led and its outcome.", category: "leadership" },
+        { question: "How do you keep up with new industry trends?", category: "technical" },
       ];
     }
 
-    const questionsToSave = questions.map((q: any) => ({
+    // Save to DB
+    const toSave = questions.map((q: any) => ({
       user_id: user.id,
       question: q.question,
       category: q.category,
@@ -103,23 +74,17 @@ serve(async (req) => {
       company_name: companyName || null,
     }));
 
-    const { error: dbError } = await supabase
-      .from("interview_questions")
-      .insert(questionsToSave);
-
-    if (dbError) {
-      console.error("DB Error:", dbError);
-      throw new Error("Failed to save questions");
-    }
+    const { error: dbError } = await supabase.from("interview_questions").insert(toSave);
+    if (dbError) throw dbError;
 
     return new Response(JSON.stringify({ questions }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error: any) {
-    console.error('Error in generate-interview-questions function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (err: any) {
+    console.error("Error in generate-interview-questions:", err);
+    return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

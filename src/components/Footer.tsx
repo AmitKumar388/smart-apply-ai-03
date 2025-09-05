@@ -53,7 +53,7 @@ export const Footer = () => {
             
             <div className="grid grid-cols-2 gap-8 ">
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1 ml-5">50K+</div>
+                <div className="text-2xl font-bold text-primary mb-1 ml-5">50+</div>
                 <div className="text-sm text-muted-foreground ml-5">Active Users</div>
               </div>
               <div className="text-center">
@@ -61,7 +61,7 @@ export const Footer = () => {
                 <div className="text-sm text-muted-foreground ml-20">Success Rate</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary mb-1 ml-5">1M+</div>
+                <div className="text-2xl font-bold text-primary mb-1 ml-5">1k+</div>
                 <div className="text-sm text-muted-foreground ml-5">Resumes Optimized</div>
               </div>
               <div className="text-center">

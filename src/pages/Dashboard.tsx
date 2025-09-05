@@ -42,14 +42,6 @@ const quickActions = [
     color: 'text-purple-400',
     bgColor: 'bg-purple-500/10',
   },
-  {
-    title: 'Build Portfolio',
-    description: 'Auto-generate your professional portfolio',
-    icon: User,
-    href: '/dashboard/portfolio',
-    color: 'text-orange-400',
-    bgColor: 'bg-orange-500/10',
-  },
 ];
 
 export const Dashboard = () => {
