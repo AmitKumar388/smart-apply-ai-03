@@ -4,7 +4,7 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_URL: string
   readonly VITE_SUPABASE_KEY: string
   readonly VITE_GOOGLE_GEMINI_API_KEY: string
-  // add more env variables here...
+  // add more env variables as needed
 }
 
 interface ImportMeta {

@@ -1,18 +1,17 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std/http/server.ts";
 import { createClient } from "@supabase/supabase-js";
 
-// Add Deno type declaration for TypeScript
 // @ts-ignore
 declare const Deno: any;
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+// ✅ Use Deno.serve (built-in), not a custom serve
+Deno.serve(async (req) => {
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type",
+  };
 
-serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -20,7 +19,7 @@ serve(async (req) => {
   try {
     const { jobRole, companyName } = await req.json();
 
-    // Get environment variables
+    // ✅ Env vars
     const geminiApiKey = Deno.env.get("GOOGLE_GEMINI_API_KEY");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
@@ -29,7 +28,7 @@ serve(async (req) => {
       throw new Error("Google Gemini API key not configured");
     }
 
-    // Get user from auth header
+    // ✅ Auth
     const authHeader = req.headers.get("authorization");
     if (!authHeader) {
       throw new Error("No authorization header");
@@ -48,29 +47,21 @@ serve(async (req) => {
       throw new Error("User not authenticated");
     }
 
+    // ✅ Prompt for Gemini
     const prompt = `You are an expert interview coach. Generate 5 challenging but realistic interview questions for a ${jobRole} position${
       companyName ? ` at ${companyName}` : ""
     }. Each question should be structured to allow for STAR method responses (Situation, Task, Action, Result). Return the questions as a JSON array of objects with 'question' and 'category' fields. Categories should be: 'behavioral', 'technical', 'situational', or 'leadership'.`;
 
+    // ✅ Call Gemini API
     const geminiRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
+          contents: [{ parts: [{ text: prompt }] }],
         }),
-      }
+      },
     );
 
     if (!geminiRes.ok) {
@@ -84,7 +75,7 @@ serve(async (req) => {
       const content = aiData.candidates[0].content.parts[0].text;
       questions = JSON.parse(content);
     } catch (_) {
-      // Fallback questions if JSON parsing fails
+      // ✅ Fallback questions
       questions = [
         {
           question:
@@ -112,10 +103,10 @@ serve(async (req) => {
       ];
     }
 
+    // ✅ Save to DB
     const questionsToSave = questions.map((q: any) => ({
       user_id: user.id,
       question: q.question,
-      category: q.category,
       job_title: jobRole,
       company_name: companyName || null,
     }));
@@ -131,6 +122,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ questions }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
     });
   } catch (error: any) {
     console.error("Error in generate-interview-questions function:", error);
