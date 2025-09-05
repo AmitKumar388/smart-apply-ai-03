@@ -55,7 +55,6 @@ export const optimizeResume = async (resumeContent: string, jobDescription: stri
   const response = await result.response;
   const text = response.text();
   
-  // Parse the response
   const sections = text.split(/(?:OPTIMIZED_RESUME:|IMPROVEMENTS:|MATCH_SCORE:|KEYWORDS:)/);
   
   return {

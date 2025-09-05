@@ -15,7 +15,6 @@ serve(async (req) => {
   try {
     const { resumeContent, jobDescription } = await req.json();
     
-    // Get user from auth header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('No authorization header');
