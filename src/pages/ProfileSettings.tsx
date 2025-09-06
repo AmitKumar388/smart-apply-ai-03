@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardHeader } from '../components/DashboardHeader';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -6,16 +6,103 @@ import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
 import { Separator } from '../components/ui/separator';
 import { useToast } from '../hooks/use-toast';
+import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../integrations/supabase/client';
 import { Settings, Bell, Shield, Eye, Trash2 } from 'lucide-react';
 
 export const ProfileSettings = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  
+  // Settings state
+  const [settings, setSettings] = useState({
+    email_notifications: true,
+    interview_reminders: true,
+    resume_optimization_alerts: true,
+    profile_visibility: false,
+    data_analytics: true,
+  });
+  
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const handleSaveSettings = () => {
-    toast({
-      title: "Settings saved",
-      description: "Your profile settings have been updated successfully.",
-    });
+  // Fetch user settings on component mount
+  useEffect(() => {
+    const fetchSettings = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('email_notifications, interview_reminders, resume_optimization_alerts, profile_visibility, data_analytics')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error fetching settings:', error);
+          toast({
+            title: "Error",
+            description: "Failed to load your settings.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (data) {
+          setSettings({
+            email_notifications: data.email_notifications ?? true,
+            interview_reminders: data.interview_reminders ?? true,
+            resume_optimization_alerts: data.resume_optimization_alerts ?? true,
+            profile_visibility: data.profile_visibility ?? false,
+            data_analytics: data.data_analytics ?? true,
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, [user?.id, toast]);
+
+  const handleSettingChange = (key: keyof typeof settings, value: boolean) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handleSaveSettings = async () => {
+    if (!user?.id) return;
+    
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          user_id: user.id,
+          ...settings,
+        }, {
+          onConflict: 'user_id'
+        });
+
+      if (error) {
+        console.error('Error saving settings:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save your settings. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Settings saved",
+        description: "Your profile settings have been updated successfully.",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -36,39 +123,51 @@ export const ProfileSettings = () => {
               </div>
               
               <div className="space-y-4 lg:space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5 flex-1 pr-4">
-                    <Label className="text-sm lg:text-base">Email Notifications</Label>
-                    <p className="text-xs lg:text-sm text-muted-foreground">
-                      Receive notifications about new features and updates
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5 flex-1 pr-4">
+                      <Label className="text-sm lg:text-base">Email Notifications</Label>
+                      <p className="text-xs lg:text-sm text-muted-foreground">
+                        Receive notifications about new features and updates
+                      </p>
+                    </div>
+                    <Switch 
+                      checked={settings.email_notifications}
+                      onCheckedChange={(checked) => handleSettingChange('email_notifications', checked)}
+                      disabled={loading}
+                    />
                   </div>
-                  <Switch defaultChecked />
-                </div>
                 
                 <Separator />
                 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5 flex-1 pr-4">
-                    <Label className="text-sm lg:text-base">Interview Reminders</Label>
-                    <p className="text-xs lg:text-sm text-muted-foreground">
-                      Get reminded about upcoming interview sessions
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5 flex-1 pr-4">
+                      <Label className="text-sm lg:text-base">Interview Reminders</Label>
+                      <p className="text-xs lg:text-sm text-muted-foreground">
+                        Get reminded about upcoming interview sessions
+                      </p>
+                    </div>
+                    <Switch 
+                      checked={settings.interview_reminders}
+                      onCheckedChange={(checked) => handleSettingChange('interview_reminders', checked)}
+                      disabled={loading}
+                    />
                   </div>
-                  <Switch defaultChecked />
-                </div>
                 
                 <Separator />
                 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5 flex-1 pr-4">
-                    <Label className="text-sm lg:text-base">Resume Optimization Alerts</Label>
-                    <p className="text-xs lg:text-sm text-muted-foreground">
-                      Notifications when optimization results are ready
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5 flex-1 pr-4">
+                      <Label className="text-sm lg:text-base">Resume Optimization Alerts</Label>
+                      <p className="text-xs lg:text-sm text-muted-foreground">
+                        Notifications when optimization results are ready
+                      </p>
+                    </div>
+                    <Switch 
+                      checked={settings.resume_optimization_alerts}
+                      onCheckedChange={(checked) => handleSettingChange('resume_optimization_alerts', checked)}
+                      disabled={loading}
+                    />
                   </div>
-                  <Switch defaultChecked />
-                </div>
               </div>
             </div>
           </Card>
@@ -82,27 +181,35 @@ export const ProfileSettings = () => {
               </div>
               
               <div className="space-y-4 lg:space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5 flex-1 pr-4">
-                    <Label className="text-sm lg:text-base">Profile Visibility</Label>
-                    <p className="text-xs lg:text-sm text-muted-foreground">
-                      Make your profile visible to recruiters
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5 flex-1 pr-4">
+                      <Label className="text-sm lg:text-base">Profile Visibility</Label>
+                      <p className="text-xs lg:text-sm text-muted-foreground">
+                        Make your profile visible to recruiters
+                      </p>
+                    </div>
+                    <Switch 
+                      checked={settings.profile_visibility}
+                      onCheckedChange={(checked) => handleSettingChange('profile_visibility', checked)}
+                      disabled={loading}
+                    />
                   </div>
-                  <Switch />
-                </div>
                 
                 <Separator />
                 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5 flex-1 pr-4">
-                    <Label className="text-sm lg:text-base">Data Analytics</Label>
-                    <p className="text-xs lg:text-sm text-muted-foreground">
-                      Allow anonymous usage analytics to improve the service
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5 flex-1 pr-4">
+                      <Label className="text-sm lg:text-base">Data Analytics</Label>
+                      <p className="text-xs lg:text-sm text-muted-foreground">
+                        Allow anonymous usage analytics to improve the service
+                      </p>
+                    </div>
+                    <Switch 
+                      checked={settings.data_analytics}
+                      onCheckedChange={(checked) => handleSettingChange('data_analytics', checked)}
+                      disabled={loading}
+                    />
                   </div>
-                  <Switch defaultChecked />
-                </div>
               </div>
             </div>
           </Card>
@@ -150,8 +257,12 @@ export const ProfileSettings = () => {
 
           {/* Save Button */}
           <div className="flex justify-end pt-6">
-            <Button onClick={handleSaveSettings} className="bg-gradient-primary text-primary-foreground w-full sm:w-auto">
-              Save All Settings
+            <Button 
+              onClick={handleSaveSettings} 
+              disabled={loading || saving}
+              className="bg-gradient-primary text-primary-foreground w-full sm:w-auto"
+            >
+              {saving ? "Saving..." : "Save All Settings"}
             </Button>
           </div>
         </div>

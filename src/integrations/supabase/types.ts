@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -17,6 +17,7 @@ export type Database = {
       interview_questions: {
         Row: {
           ai_suggestion: string | null
+          category: string | null
           company_name: string | null
           created_at: string
           id: string
@@ -28,6 +29,7 @@ export type Database = {
         }
         Insert: {
           ai_suggestion?: string | null
+          category?: string | null
           company_name?: string | null
           created_at?: string
           id?: string
@@ -39,6 +41,7 @@ export type Database = {
         }
         Update: {
           ai_suggestion?: string | null
+          category?: string | null
           company_name?: string | null
           created_at?: string
           id?: string
@@ -95,12 +98,17 @@ export type Database = {
           bio: string | null
           company: string | null
           created_at: string
+          data_analytics: boolean | null
           email: string | null
+          email_notifications: boolean | null
           full_name: string | null
           id: string
+          interview_reminders: boolean | null
           location: string | null
           phone: string | null
           professional_title: string | null
+          profile_visibility: boolean | null
+          resume_optimization_alerts: boolean | null
           updated_at: string
           user_id: string
         }
@@ -109,12 +117,17 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string
+          data_analytics?: boolean | null
           email?: string | null
+          email_notifications?: boolean | null
           full_name?: string | null
           id?: string
+          interview_reminders?: boolean | null
           location?: string | null
           phone?: string | null
           professional_title?: string | null
+          profile_visibility?: boolean | null
+          resume_optimization_alerts?: boolean | null
           updated_at?: string
           user_id: string
         }
@@ -123,12 +136,17 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string
+          data_analytics?: boolean | null
           email?: string | null
+          email_notifications?: boolean | null
           full_name?: string | null
           id?: string
+          interview_reminders?: boolean | null
           location?: string | null
           phone?: string | null
           professional_title?: string | null
+          profile_visibility?: boolean | null
+          resume_optimization_alerts?: boolean | null
           updated_at?: string
           user_id?: string
         }
