@@ -909,6 +909,9 @@ export const ResumeOptimizer = () => {
                 </div>
               </div>
             </Card>
+
+            {/* Resume and Cover Letter Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Optimized Resume */}
               <Card className="bg-gradient-card border-border/50 shadow-glow backdrop-blur-sm">
                 <div className="p-6">
