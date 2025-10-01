@@ -18,6 +18,7 @@ import ProfileSettings from "./pages/ProfileSettings";
 import Preferences from "./pages/Preferences";
 import Privacy from "./pages/Privacy";
 import Account from "./pages/Account";
+import InterviewGuide from "./pages/InterviewGuide";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +84,7 @@ const App = () => (
                 <Account />
               </DashboardLayout>
             } />
+            <Route path="/interview-guide" element={<InterviewGuide />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
