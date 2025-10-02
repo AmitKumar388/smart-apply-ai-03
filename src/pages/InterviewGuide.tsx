@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Download, FileText } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { toast } from "sonner";
-import DashboardLayout from "@/components/DashboardLayout";
+import { DashboardLayout } from "@/components/DashboardLayout";
 
 const InterviewGuide = () => {
   const [isGenerating, setIsGenerating] = useState(false);
