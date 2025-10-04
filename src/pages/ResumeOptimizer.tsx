@@ -163,27 +163,20 @@ export const ResumeOptimizer = () => {
 
   const extractTextFromPDF = async (file: File): Promise<string> => {
     try {
-      if (file.type === "application/pdf") {
-        const arrayBuffer = await file.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-
-        const text = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            resolve(
-              `Resume Content from ${file.name}:\n\nProfessional Summary:\nExperienced professional with expertise in various domains...\n\nWork Experience:\n• Current Position (2021-Present)\n• Previous Role (2019-2021)\n\nSkills:\n• Technical Skills\n• Soft Skills\n• Industry Knowledge\n\nEducation:\n• Degree Information\n• Certifications`
-            );
-          };
-          reader.readAsText(new Blob([uint8Array], { type: "text/plain" }));
-        });
-
-        return text;
+      const arrayBuffer = await file.arrayBuffer();
+      
+      // Use pdf-parse to extract text from PDF
+      const pdfParse = (await import('pdf-parse')).default;
+      const pdfData = await pdfParse(Buffer.from(arrayBuffer));
+      
+      if (pdfData.text && pdfData.text.trim().length > 0) {
+        return pdfData.text;
       } else {
-        return `Resume Content from ${file.name}:\n\nProfessional Summary:\nDedicated professional with proven track record...\n\nCore Competencies:\n• Leadership\n• Project Management\n• Technical Expertise\n\nProfessional Experience:\n• Senior Role (2020-Present)\n• Mid-level Position (2018-2020)\n\nEducation & Certifications:\n• Advanced Degree\n• Professional Certifications`;
+        throw new Error("No text content found in PDF");
       }
     } catch (error) {
       console.error("PDF extraction error:", error);
-      throw new Error("Failed to extract text from PDF");
+      throw new Error("Failed to extract text from PDF. Please ensure the PDF contains selectable text.");
     }
   };
 
@@ -203,7 +196,13 @@ export const ResumeOptimizer = () => {
           if (file.type === "application/pdf") {
             extractedText = await extractTextFromPDF(file);
           } else {
-            extractedText = `Sample resume content extracted from ${file.name}:\n\nProfessional Summary:\nExperienced software engineer with 5+ years of experience...\n\nTechnical Skills:\n- Programming languages\n- Frameworks and tools\n- Database management`;
+            // For DOCX files, inform user to convert to PDF for now
+            toast({
+              title: "DOCX Support Limited",
+              description: "For best results, please convert your DOCX to PDF. You can still proceed, but text extraction may be limited.",
+              variant: "default",
+            });
+            extractedText = `[Please note: DOCX parsing is limited. For accurate optimization, please upload a PDF version of your resume]\n\nFile: ${file.name}`;
           }
 
           setResumeContent(extractedText);
